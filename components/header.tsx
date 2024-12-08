@@ -13,7 +13,7 @@ export function Header() {
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <Image
-            src="/WhatsApp Image 2024-12-08 at 04.10.36.jpeg"
+            src="/Finzo-logo.jpeg"
             alt="Finzo Logo"
             width={120}
             height={40}

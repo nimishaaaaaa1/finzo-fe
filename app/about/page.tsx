@@ -17,7 +17,7 @@ export default function About() {
             provide you with accurate, timely, and personalized advice.
           </p>
           <p>
-            Whether you're looking to optimize your tax strategy, create a budget that works for you, or make smart 
+            Whether you&apos;re looking to optimize your tax strategy, create a budget that works for you, or make smart 
             investment decisions, Finzo is here to guide you every step of the way.
           </p>
         </div>
