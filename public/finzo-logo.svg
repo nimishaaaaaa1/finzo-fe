@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+  <!-- F -->
+  <path d="M50 40 L50 160 M50 40 L130 40 M50 100 L110 100" 
+        stroke="#FFE7E6" stroke-width="12" stroke-linecap="round" fill="none"/>
+  
+  <!-- I -->
+  <path d="M180 40 L180 160" 
+        stroke="#FFE7E6" stroke-width="12" stroke-linecap="round" fill="none"/>
+  
+  <!-- N -->
+  <path d="M230 160 L230 40 L330 160 L330 40" 
+        stroke="#FFE7E6" stroke-width="12" stroke-linecap="round" fill="none"/>
+  
+  <!-- Z -->
+  <path d="M380 40 L480 40 L380 160 L480 160" 
+        stroke="#FFE7E6" stroke-width="12" stroke-linecap="round" fill="none"/>
+  
+  <!-- O -->
+  <circle cx="580" cy="100" r="60" 
+          stroke="#FFE7E6" stroke-width="12" fill="none"/>
+  
+  <!-- Decorative dot representing financial growth -->
+  <circle cx="700" cy="100" r="8" 
+          fill="#FFE7E6"/>
+  
+  <!-- Rising line graph -->
+  <path d="M670 120 Q685 90, 700 70 T730 40" 
+        stroke="#FFE7E6" stroke-width="4" fill="none"/>
+</svg> 

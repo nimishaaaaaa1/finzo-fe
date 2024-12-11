@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect x="0" y="0" width="512" height="512" rx="100" ry="100" fill="#9333EA"/>
+  
+  <!-- Document icon -->
+  <path d="M180 140 L332 140 L332 372 L180 372 Z" 
+        stroke="#FFFFFF" stroke-width="24" fill="none"/>
+  
+  <!-- Document lines -->
+  <path d="M220 220 L292 220" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/>
+  <path d="M220 280 L292 280" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/>
+  <path d="M220 340 L292 340" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/>
+  
+  <!-- Corner fold -->
+  <path d="M332 140 L332 180 L372 180 L332 140" 
+        fill="#FFFFFF"/>
+</svg> 
