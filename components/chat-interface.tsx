@@ -81,15 +81,12 @@ export function ChatInterface() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Title */}
       <div className="text-center mb-4 sm:mb-6">
         <h1 className="text-4xl sm:text-5xl font-bold text-purple-600 mb-1 sm:mb-2">Ask Finzo</h1>
         <p className="text-lg sm:text-xl text-purple-600">Your Financial Guide</p>
       </div>
 
-      {/* Main Container */}
       <div className="bg-white rounded-[32px] sm:rounded-[40px] shadow-xl border border-purple-100/50">
-        {/* Show Prompts only when no messages */}
         {messages.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 sm:p-6">
             {SAMPLE_PROMPTS.map((prompt, index) => (
@@ -105,7 +102,6 @@ export function ChatInterface() {
           </div>
         )}
 
-        {/* Message Area */}
         {messages.length > 0 && (
           <ScrollArea className="px-4 sm:px-6 py-4 h-[350px] sm:h-[400px]">
             {messages.map((message, index) => (
@@ -160,7 +156,6 @@ export function ChatInterface() {
           </ScrollArea>
         )}
 
-        {/* Chat Input */}
         <div className="p-4 sm:p-6 pt-0">
           <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-gray-50/80 p-2 rounded-full border border-gray-100">
             <Input
