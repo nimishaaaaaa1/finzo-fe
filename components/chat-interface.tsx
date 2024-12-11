@@ -1,31 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ReactMarkdown from 'react-markdown'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Send } from 'lucide-react'
 
 export function ChatInterface() {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
     {
       role: 'assistant',
-      content: `# 👋 Welcome to Finzo!
+      content: `# 👋 Heyaa!
 
-I'm your all-in-one platform for:
-- 📊 Simplifying taxes
-- 💰 Mastering budgeting
-- 📈 Making smart investments
+This is Finzo, your finance buddy.
 
-I provide intuitive tools and expert advice to help you:
-- Manage your finances with ease
-- Reduce tax burdens
-- Grow your wealth
+Let's tackle your money matters together — no stress, just simple, helpful advice.
 
-**No jargons, no stress, only results.**
+I've got you covered with:
+- Less scary taxes (yes, it's possible!)
+- Budgeting made easy (and fun!)
+- Investment tips that actually make sense
 
-How can I assist you today?`
+I'm your go-to for:
+- Smart saving without sacrificing your ☕
+- Hidden tax benefits you shouldn't miss
+- Step-by-step wealth growth
+
+What's on your mind today? Let's chat! 💭`
     }
   ])
   const [input, setInput] = useState('')
@@ -70,29 +76,48 @@ How can I assist you today?`
     }
   }
 
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  }, [messages])
+
   return (
-    <div className="bg-white border rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-      <ScrollArea className="h-[500px] p-6 bg-gradient-to-b from-gray-50 to-white scroll-smooth">
-        <AnimatePresence>
-          {messages.map((message: { role: 'user' | 'assistant' | 'system', content: string }, index) => (
-            message.role !== 'system' && (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ 
-                  duration: 0.4,
-                  ease: "easeOut",
-                  delay: index * 0.1 
-                }}
-                className={`mb-6 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
-              >
-                <span
-                  className={`inline-block p-4 rounded-2xl max-w-[85%] shadow-sm backdrop-blur-sm ${
+    <div className="bg-white/90 backdrop-blur-xl border rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
+      {/* Chat Header */}
+      <div className="p-4 border-b bg-gradient-to-r from-purple-600 to-purple-700">
+        <h2 className="text-lg font-semibold text-white">Hi, I am Finzo ✨</h2>
+      </div>
+
+      {/* Messages Area */}
+      <ScrollArea 
+        ref={scrollRef}
+        className="h-[500px] p-6 bg-gradient-to-b from-purple-50/50 via-white/50 to-purple-50/50"
+      >
+        <AnimatePresence initial={false}>
+          {messages.map((message, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                duration: 0.4,
+                type: "spring",
+                stiffness: 100,
+                damping: 15
+              }}
+              className={`mb-6 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`flex items-start gap-3 max-w-[85%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div
+                  className={`p-4 rounded-2xl ${
                     message.role === 'user'
-                      ? 'bg-primary/95 text-primary-foreground rounded-tr-none'
-                      : 'bg-white/95 text-gray-800 rounded-tl-none border border-gray-100'
+                      ? 'bg-purple-600 text-white rounded-tr-none'
+                      : 'bg-white text-gray-800 rounded-tl-none border border-purple-100 shadow-sm hover:shadow-md transition-shadow'
                   }`}
                 >
                   <ReactMarkdown
@@ -115,62 +140,69 @@ How can I assist you today?`
                       strong: ({ children }) => (
                         <strong className="font-semibold">{children}</strong>
                       ),
-                      a: ({ children, href }) => (
-                        <a 
-                          href={href} 
-                          className="text-blue-500 hover:underline transition-colors" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          {children}
-                        </a>
-                      ),
-                      code: ({ children }) => (
-                        <code className="bg-white/80 rounded px-1.5 py-0.5 font-mono text-sm">
-                          {children}
-                        </code>
-                      ),
                     }}
                   >
                     {message.content}
                   </ReactMarkdown>
-                </span>
-              </motion.div>
-            )
+                </div>
+              </div>
+            </motion.div>
           ))}
         </AnimatePresence>
+        
+        {/* Loading Animation */}
         {isLoading && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-left mb-6"
+            className="flex items-start gap-3 mb-6"
           >
-            <span className="inline-block p-3 rounded-2xl bg-white/95 text-gray-800 rounded-tl-none border border-gray-100 shadow-sm">
-              <div className="flex gap-2 px-2">
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" />
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce [animation-delay:0.2s]" />
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce [animation-delay:0.4s]" />
+            <div className="p-4 rounded-2xl bg-white rounded-tl-none border border-purple-100 shadow-sm">
+              <div className="flex gap-2">
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }} 
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-purple-600/60" 
+                />
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }} 
+                  transition={{ duration: 1, delay: 0.2, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-purple-600/60" 
+                />
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }} 
+                  transition={{ duration: 1, delay: 0.4, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-purple-600/60" 
+                />
               </div>
-            </span>
+            </div>
           </motion.div>
         )}
       </ScrollArea>
-      <form onSubmit={handleSubmit} className="flex p-4 border-t bg-white/95 backdrop-blur-sm">
-        <Input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message here..."
-          className="flex-grow mr-3 bg-gray-50/80 border-gray-200 focus:border-primary/30 focus:ring-primary/20 transition-all"
-          disabled={isLoading}
-        />
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 transition-colors"
-        >
-          Send
-        </Button>
+
+      {/* Input Area */}
+      <form 
+        onSubmit={handleSubmit} 
+        className="p-4 border-t bg-white/95 backdrop-blur-sm"
+      >
+        <div className="flex gap-3">
+          <Input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Say hi! Let's talk about your finances..."
+            className="flex-grow bg-gray-50/80 border-gray-200 focus:border-purple-300 focus:ring-purple-200 transition-all rounded-xl"
+            disabled={isLoading}
+          />
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="bg-purple-600 text-white hover:bg-purple-700 px-6 rounded-xl transition-all duration-200 hover:scale-105"
+          >
+            <Send className="w-5 h-5" />
+          </Button>
+        </div>
       </form>
     </div>
   )
