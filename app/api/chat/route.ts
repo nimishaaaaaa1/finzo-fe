@@ -10,120 +10,115 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-const ASSISTANT_ID = "asst_gsS3yKgUv8xgP6kk97hO0F9j"
+const SYSTEM_PROMPT = `You are "Finzo" 🎯, a friendly Indian financial guide! Format ALL responses EXACTLY like this:
+
+## 📌 {Topic}
+
+Hey there! {One friendly greeting}
+
+### 🎯 Key Points
+
+**1. First Point** ✨
+• {Clear explanation}
+• {Simple example}
+
+**2. Second Point** 💫
+• {Clear explanation}
+• {Simple example}
+
+**3. Third Point** 💡
+• {Clear explanation}
+• {Simple example}
+
+### 💫 Detailed Breakdown
+
+**Understanding the Basics:**
+• {Main concept in simple terms}
+• {Easy-to-understand example}
+    - {Practical point}
+    - {Helpful detail}
+
+**Important Details:**
+• {Key information}
+• {Practical application}
+    - {Useful tip}
+    - {Action item}
+
+### 📊 Comparison Table
+
+| Feature       | Option A          | Option B          |
+|:--------------|:------------------|:------------------|
+| **Cost**      | **₹XX,XXX**       | **₹XX,XXX**       |
+| **Benefits**  | • First benefit   | • First benefit   |
+|              | • Second benefit  | • Second benefit  |
+| **Best For**  | • These users    | • Those users     |
+|              | • These cases     | • Those cases     |
+
+### ⚠️ Important Notes
+
+**Remember:**
+• {Key point to remember}
+• {Important consideration}
+
+**Pro Tips:**
+• {Helpful advice}
+• {Practical suggestion}
+
+### 🎬 Quick Summary
+
+1. {Main takeaway}
+2. {Action step}
+3. {Final tip}
+
+-------------------
+
+STRICT FORMATTING RULES:
+
+1. Tables MUST use proper alignment with colons
+2. ALL numbers must be bold: **₹1,50,000**
+3. ALL lists must use bullet points (•)
+4. ALL sections must have proper spacing
+5. ALL main points must be numbered
+6. ALL tables must follow the exact format above
+7. ALL headings must use emojis as shown
+8. ALL responses must maintain consistent spacing
+
+Table Rules:
+• Use |:---| for left alignment
+• Add spaces between table rows
+• Bold headers and numbers
+• Use bullet points in cells
+• Maintain column alignment`
 
 export async function POST(req: Request) {
   try {
-    // Validate request
-    if (!req.body) {
-      return NextResponse.json(
-        { error: 'Missing request body' },
-        { status: 400 }
-      )
-    }
+    const body = await req.json()
+    const { messages } = body
 
-    const { messages } = await req.json()
-    if (!messages || !messages.length) {
-      return NextResponse.json(
-        { error: 'Missing messages in request' },
-        { status: 400 }
-      )
-    }
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: SYSTEM_PROMPT
+        },
+        ...messages.map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      ],
+      temperature: 0.7,
+      max_tokens: 1500,
+    })
 
-    const userMessage = messages[messages.length - 1].content
-
-    // Create thread with error handling
-    let thread
-    try {
-      thread = await openai.beta.threads.create()
-    } catch (error) {
-      console.error('Error creating thread:', error)
-      return NextResponse.json(
-        { error: 'Failed to create thread. Please check your API key.' },
-        { status: 500 }
-      )
-    }
-
-    // Add message to thread
-    try {
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: userMessage
-      })
-    } catch (error) {
-      console.error('Error adding message:', error)
-      return NextResponse.json(
-        { error: 'Failed to add message to thread' },
-        { status: 500 }
-      )
-    }
-
-    // Run the assistant
-    let run
-    try {
-      run = await openai.beta.threads.runs.create(thread.id, {
-        assistant_id: ASSISTANT_ID
-      })
-    } catch (error) {
-      console.error('Error starting run:', error)
-      return NextResponse.json(
-        { error: 'Failed to start assistant run' },
-        { status: 500 }
-      )
-    }
-
-    // Wait for completion
-    let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
-    let attempts = 0
-    const maxAttempts = 30 // 30 seconds timeout
-
-    while (runStatus.status !== 'completed' && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
-      attempts++
-    }
-
-    if (runStatus.status !== 'completed') {
-      return NextResponse.json(
-        { error: `Assistant run ${runStatus.status}` },
-        { status: 500 }
-      )
-    }
-
-    // Get the response
-    const threadMessages = await openai.beta.threads.messages.list(thread.id)
-    const lastMessage = threadMessages.data[0]
-
-    // Fixed type checking
-    if (!lastMessage?.content?.[0] || lastMessage.content[0].type !== 'text') {
-      return NextResponse.json(
-        { error: 'Invalid response format' },
-        { status: 500 }
-      )
-    }
-
-    // Safely access text content
-    const messageContent = lastMessage.content[0]
-    if ('text' in messageContent) {
-      return NextResponse.json({
-        result: {
-          content: messageContent.text.value
-        }
-      })
-    }
-
-    return NextResponse.json(
-      { error: 'Unexpected response format' },
-      { status: 500 }
-    )
+    return NextResponse.json({ 
+      result: completion.choices[0].message
+    })
 
   } catch (error) {
     console.error('Error in chat API:', error)
     return NextResponse.json(
-      { 
-        error: 'Failed to process your request',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Failed to process your request' },
       { status: 500 }
     )
   }

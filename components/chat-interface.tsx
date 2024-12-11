@@ -1,214 +1,184 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ReactMarkdown from 'react-markdown'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Send } from 'lucide-react'
+
+const SAMPLE_PROMPTS = [
+  {
+    text: "Explain the difference between the old and new tax regime",
+    category: "Taxation"
+  },
+  {
+    text: "Suggest good investments for a Balanced investor",
+    category: "Investment"
+  },
+  {
+    text: "I have an SIP of Rs 5000 per month but I also invest in stocks",
+    category: "Portfolio"
+  },
+  {
+    text: "Which small-cap mutual funds are best for me to invest in 2024?",
+    category: "Mutual Funds"
+  }
+]
+
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+}
 
 export function ChatInterface() {
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
-    {
-      role: 'assistant',
-      content: `# 👋 Heyaa!
-
-This is Finzo, your finance buddy.
-
-Let's tackle your money matters together — no stress, just simple, helpful advice.
-
-I've got you covered with:
-- Less scary taxes (yes, it's possible!)
-- Budgeting made easy (and fun!)
-- Investment tips that actually make sense
-
-I'm your go-to for:
-- Smart saving without sacrificing your ☕
-- Hidden tax benefits you shouldn't miss
-- Step-by-step wealth growth
-
-What's on your mind today? Let's chat! 💭`
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [threadId, setThreadId] = useState<string | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
+  const handleSubmit = async (e: React.FormEvent | string) => {
+    if (typeof e === 'string') {
+      sendMessage(e)
+    } else {
+      e.preventDefault()
+      if (input.trim()) {
+        sendMessage(input)
+        setInput('')
+      }
+    }
+  }
 
-    const userMessage = { role: 'user' as const, content: input }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
+  const sendMessage = async (content: string) => {
     setIsLoading(true)
+    const newMessage: Message = { role: 'user', content }
+    setMessages(prev => [...prev, newMessage])
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          messages: messages.concat(userMessage),
-          threadId: threadId 
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...messages, newMessage] }),
       })
 
       if (!response.ok) throw new Error('Failed to fetch response')
 
       const data = await response.json()
-      
       if (data.result) {
-        setThreadId(data.result.threadId)
-        setMessages(prev => [...prev, { role: 'assistant', content: data.result.content }])
-      } else {
-        throw new Error('Invalid response format')
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: data.result.content 
+        }])
       }
-
     } catch (error) {
       console.error('Error:', error)
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "Oops! Let me try that again. Could you please rephrase your question? 😊" 
+        content: "I encountered an error. Please try again." 
       }])
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      })
-    }
-  }, [messages])
-
   return (
-    <div className="bg-white/90 backdrop-blur-xl border rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
-      {/* Chat Header */}
-      <div className="p-4 border-b bg-gradient-to-r from-purple-600 to-purple-700">
-        <h2 className="text-lg font-semibold text-white">Hi, I am Finzo ✨</h2>
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Title */}
+      <div className="text-center mb-4 sm:mb-6">
+        <h1 className="text-4xl sm:text-5xl font-bold text-purple-600 mb-1 sm:mb-2">Ask Finzo</h1>
+        <p className="text-lg sm:text-xl text-purple-600">Your Financial Guide</p>
       </div>
 
-      {/* Messages Area */}
-      <ScrollArea 
-        ref={scrollRef}
-        className="h-[500px] p-6 bg-gradient-to-b from-purple-50/50 via-white/50 to-purple-50/50"
-      >
-        <AnimatePresence initial={false}>
-          {messages.map((message, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ 
-                duration: 0.4,
-                type: "spring",
-                stiffness: 100,
-                damping: 15
-              }}
-              className={`mb-6 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`flex items-start gap-3 max-w-[85%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* Main Container */}
+      <div className="bg-white rounded-[32px] sm:rounded-[40px] shadow-xl border border-purple-100/50">
+        {/* Show Prompts only when no messages */}
+        {messages.length === 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 sm:p-6">
+            {SAMPLE_PROMPTS.map((prompt, index) => (
+              <button
+                key={index}
+                onClick={() => handleSubmit(prompt.text)}
+                className="group bg-white p-4 rounded-2xl text-left border border-gray-100 hover:shadow-sm transition-all"
+              >
+                <p className="text-gray-900 text-sm sm:text-base mb-2">{prompt.text}</p>
+                <span className="text-purple-500 text-xs sm:text-sm font-medium">{prompt.category}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Message Area */}
+        {messages.length > 0 && (
+          <ScrollArea className="px-4 sm:px-6 py-4 h-[350px] sm:h-[400px]">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`mb-4 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
+              >
                 <div
-                  className={`p-4 rounded-2xl ${
+                  className={`inline-block p-4 rounded-2xl max-w-[85%] ${
                     message.role === 'user'
-                      ? 'bg-purple-600 text-white rounded-tr-none'
-                      : 'bg-white text-gray-800 rounded-tl-none border border-purple-100 shadow-sm hover:shadow-md transition-shadow'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-50 text-gray-900'
                   }`}
                 >
-                  <ReactMarkdown
-                    components={{
-                      h1: ({ children }) => (
-                        <h1 className="text-xl font-semibold mb-2">{children}</h1>
-                      ),
-                      p: ({ children }) => (
-                        <p className="m-0 leading-relaxed tracking-wide">{children}</p>
-                      ),
-                      ul: ({ children }) => (
-                        <ul className="space-y-2 my-2">{children}</ul>
-                      ),
-                      li: ({ children }) => (
-                        <li className="flex items-start gap-2">
-                          <span className="select-none">•</span>
-                          <span>{children}</span>
-                        </li>
-                      ),
-                      strong: ({ children }) => (
-                        <strong className="font-semibold">{children}</strong>
-                      ),
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
+                  {message.role === 'assistant' ? (
+                    <ReactMarkdown 
+                      className="prose prose-sm max-w-none
+                        prose-headings:font-semibold 
+                        prose-h2:text-lg prose-h2:text-purple-900 prose-h2:mt-4 prose-h2:mb-2
+                        prose-h3:text-base prose-h3:text-purple-800 prose-h3:mt-3 prose-h3:mb-2
+                        prose-p:mb-2 prose-p:leading-relaxed
+                        prose-ul:my-2 prose-ul:space-y-1
+                        prose-li:mb-1 prose-li:leading-relaxed
+                        prose-strong:text-purple-900 prose-strong:font-semibold
+                        prose-table:my-2 prose-table:border-collapse
+                        prose-th:py-2 prose-th:px-4 prose-th:bg-purple-50
+                        prose-td:py-2 prose-td:px-4
+                        first:prose-p:mt-0 last:prose-p:mb-0
+                        prose-ul:list-none prose-ul:pl-0
+                        prose-li:before:content-['•'] prose-li:before:text-purple-500 prose-li:before:mr-2
+                        prose-a:text-purple-600 prose-a:no-underline hover:prose-a:underline"
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  ) : (
+                    <p className="leading-relaxed">{message.content}</p>
+                  )}
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        
-        {/* Loading Animation */}
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex items-start gap-3 mb-6"
-          >
-            <div className="p-4 rounded-2xl bg-white rounded-tl-none border border-purple-100 shadow-sm">
-              <div className="flex gap-2">
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }} 
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="w-2 h-2 rounded-full bg-purple-600/60" 
-                />
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }} 
-                  transition={{ duration: 1, delay: 0.2, repeat: Infinity }}
-                  className="w-2 h-2 rounded-full bg-purple-600/60" 
-                />
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }} 
-                  transition={{ duration: 1, delay: 0.4, repeat: Infinity }}
-                  className="w-2 h-2 rounded-full bg-purple-600/60" 
-                />
+            ))}
+            {isLoading && (
+              <div className="text-left mb-4">
+                <div className="inline-block p-4 rounded-2xl bg-gray-50">
+                  <div className="flex gap-2 items-center">
+                    <div className="w-2 h-2 bg-purple-600/60 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <div className="w-2 h-2 bg-purple-600/60 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <div className="w-2 h-2 bg-purple-600/60 rounded-full animate-bounce" />
+                  </div>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            )}
+          </ScrollArea>
         )}
-      </ScrollArea>
 
-      {/* Input Area */}
-      <form 
-        onSubmit={handleSubmit} 
-        className="p-4 border-t bg-white/95 backdrop-blur-sm"
-      >
-        <div className="flex gap-3">
-          <Input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Say hi! Let's talk about your finances..."
-            className="flex-grow bg-gray-50/80 border-gray-200 focus:border-purple-300 focus:ring-purple-200 transition-all rounded-xl"
-            disabled={isLoading}
-          />
-          <Button 
-            type="submit" 
-            disabled={isLoading}
-            className="bg-purple-600 text-white hover:bg-purple-700 px-6 rounded-xl transition-all duration-200 hover:scale-105"
-          >
-            <Send className="w-5 h-5" />
-          </Button>
+        {/* Chat Input */}
+        <div className="p-4 sm:p-6 pt-0">
+          <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-gray-50/80 p-2 rounded-full border border-gray-100">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask me anything about Indian finance..."
+              className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-2 text-sm sm:text-base placeholder:text-gray-400"
+            />
+            <Button 
+              type="submit"
+              disabled={isLoading}
+              className="bg-purple-600 hover:bg-purple-700 rounded-full px-6 sm:px-8 text-sm sm:text-base"
+            >
+              Send
+            </Button>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   )
 }
