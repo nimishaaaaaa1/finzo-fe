@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
+// Validate environment variables
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error('Missing OpenAI API Key')
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
@@ -9,77 +14,104 @@ const ASSISTANT_ID = "asst_gsS3yKgUv8xgP6kk97hO0F9j"
 
 export async function POST(req: Request) {
   try {
-    // Log the start of the request
-    console.log('Starting chat request...')
-    
+    // Validate request
+    if (!req.body) {
+      return NextResponse.json(
+        { error: 'Missing request body' },
+        { status: 400 }
+      )
+    }
+
     const { messages } = await req.json()
+    if (!messages || !messages.length) {
+      return NextResponse.json(
+        { error: 'Missing messages in request' },
+        { status: 400 }
+      )
+    }
+
     const userMessage = messages[messages.length - 1].content
-    
-    console.log('Creating thread...')
-    const thread = await openai.beta.threads.create()
-    console.log('Thread created:', thread.id)
 
-    console.log('Adding message to thread...')
-    await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: userMessage
-    })
+    // Create thread with error handling
+    let thread
+    try {
+      thread = await openai.beta.threads.create()
+    } catch (error) {
+      console.error('Error creating thread:', error)
+      return NextResponse.json(
+        { error: 'Failed to create thread. Please check your API key.' },
+        { status: 500 }
+      )
+    }
 
-    console.log('Starting assistant run...')
-    const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: ASSISTANT_ID
-    })
+    // Add message to thread
+    try {
+      await openai.beta.threads.messages.create(thread.id, {
+        role: "user",
+        content: userMessage
+      })
+    } catch (error) {
+      console.error('Error adding message:', error)
+      return NextResponse.json(
+        { error: 'Failed to add message to thread' },
+        { status: 500 }
+      )
+    }
 
-    console.log('Waiting for completion...')
+    // Run the assistant
+    let run
+    try {
+      run = await openai.beta.threads.runs.create(thread.id, {
+        assistant_id: ASSISTANT_ID
+      })
+    } catch (error) {
+      console.error('Error starting run:', error)
+      return NextResponse.json(
+        { error: 'Failed to start assistant run' },
+        { status: 500 }
+      )
+    }
+
+    // Wait for completion
     let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
-    
-    // Wait for a maximum of 30 seconds
     let attempts = 0
-    while (runStatus.status !== 'completed' && attempts < 30) {
-      console.log('Run status:', runStatus.status)
+    const maxAttempts = 30 // 30 seconds timeout
+
+    while (runStatus.status !== 'completed' && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
       attempts++
     }
 
     if (runStatus.status !== 'completed') {
-      console.log('Run timed out or failed:', runStatus.status)
-      throw new Error(`Assistant run ${runStatus.status}`)
+      return NextResponse.json(
+        { error: `Assistant run ${runStatus.status}` },
+        { status: 500 }
+      )
     }
 
-    console.log('Getting messages...')
+    // Get the response
     const threadMessages = await openai.beta.threads.messages.list(thread.id)
-    
-    if (!threadMessages.data || threadMessages.data.length === 0) {
-      console.log('No messages found in thread')
-      throw new Error('No messages found')
-    }
-
     const lastMessage = threadMessages.data[0]
-    
-    if (!lastMessage.content || !lastMessage.content[0]) {
-      console.log('No content in message')
-      throw new Error('Empty message content')
+
+    if (!lastMessage?.content?.[0]?.type === 'text') {
+      return NextResponse.json(
+        { error: 'Invalid response format' },
+        { status: 500 }
+      )
     }
 
-    const content = lastMessage.content[0]
-    if (content.type !== 'text') {
-      console.log('Message content is not text:', content.type)
-      throw new Error('Invalid content type')
-    }
-
-    console.log('Successfully got response')
-    return NextResponse.json({ 
-      result: { 
-        content: content.text.value
-      } 
+    return NextResponse.json({
+      result: {
+        content: lastMessage.content[0].text.value
+      }
     })
 
   } catch (error) {
     console.error('Error in chat API:', error)
     return NextResponse.json(
       { 
-        error: 'Failed to process your request. Please try again.',
+        error: 'Failed to process your request',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
