@@ -1,76 +1,62 @@
-// 
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Add type for conversation messages
-type ChatMessage = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-const SYSTEM_PROMPT: ChatMessage = {
-  role: "system",
-  content: `You are Finzo, a fun and knowledgeable AI assistant for Indian taxation and finance, built with Next.js. Keep responses concise and engaging.
-
-Key Capabilities:
-- Income Tax (Old vs New regime, calculations, filing)
-- GST guidance and calculations
-- Financial literacy (budgeting, saving)
-- Investment advice (FDs, PPF, Mutual Funds)
-
-Style Guide:
-- Keep responses under 50 words when possible
-- Use emojis sparingly (max 2 per response)
-- Format using markdown for readability
-- Be friendly but direct
-- Never add generic closing messages
-- Don't mention being an AI or suggest consulting experts
-
-Tax Knowledge:
-- Current tax slabs (FY 2024-25)
-- GST rates (5%, 12%, 18%, 28%)
-- Section 80C/80D deductions`
-}
-
-// Use the type for conversation history
-let conversationHistory: ChatMessage[] = []
+const ASSISTANT_ID = "asst_gsS3yKgUv8xgP6kk97hO0F9j"
 
 export async function POST(req: Request) {
   try {
-    const { messages }: { messages: ChatMessage[] } = await req.json()
+    const { messages } = await req.json()
+    const userMessage = messages[messages.length - 1].content
+
+    // Create a thread
+    const thread = await openai.beta.threads.create()
+
+    // Add the user's message to the thread
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: userMessage
+    })
+
+    // Run the assistant
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: ASSISTANT_ID
+    })
+
+    // Poll for completion
+    let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
     
-    conversationHistory = [
-      SYSTEM_PROMPT,
-      ...conversationHistory.slice(-10),
-      ...messages.slice(-2)
-    ]
+    while (runStatus.status !== 'completed') {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
+      
+      if (runStatus.status === 'failed') {
+        throw new Error('Assistant run failed')
+      }
+    }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: conversationHistory,
-      temperature: 0.7,
-      max_tokens: 500,
+    // Get the assistant's response
+    const threadMessages = await openai.beta.threads.messages.list(thread.id)
+    const lastMessage = threadMessages.data[0]
+
+    // Type check the content
+    if (!lastMessage.content[0] || lastMessage.content[0].type !== 'text') {
+      throw new Error('No text content in response')
+    }
+
+    return NextResponse.json({ 
+      result: { 
+        content: lastMessage.content[0].text.value 
+      } 
     })
 
-    const assistantMessage = completion.choices[0].message
-
-    // Add assistant's response to history
-    conversationHistory.push({
-      role: assistantMessage.role,
-      content: assistantMessage.content || ''  // Provide empty string as fallback
-    })
-
-    return NextResponse.json({
-      result: assistantMessage
-    })
   } catch (error) {
-    console.error('OpenAI API error:', error)
+    console.error('Error:', error)
     return NextResponse.json(
-      { error: 'Failed to process your request' },
+      { error: 'Failed to fetch response from OpenAI' },
       { status: 500 }
     )
   }
