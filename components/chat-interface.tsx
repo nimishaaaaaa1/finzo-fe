@@ -36,6 +36,7 @@ What's on your mind today? Let's chat! 💭`
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [threadId, setThreadId] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,14 +48,15 @@ What's on your mind today? Let's chat! 💭`
     setIsLoading(true)
 
     try {
-      const recentMessages = messages.slice(-2).concat(userMessage)
-      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages: recentMessages }),
+        body: JSON.stringify({ 
+          messages: messages.concat(userMessage),
+          threadId: threadId 
+        }),
       })
 
       if (!response.ok) throw new Error('Failed to fetch response')
@@ -62,6 +64,7 @@ What's on your mind today? Let's chat! 💭`
       const data = await response.json()
       
       if (data.result) {
+        setThreadId(data.result.threadId)
         setMessages(prev => [...prev, { role: 'assistant', content: data.result.content }])
       } else {
         throw new Error('Invalid response format')
