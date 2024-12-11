@@ -23,6 +23,11 @@ export default function Home() {
             <h1 className="text-5xl md:text-7xl font-bold mb-8 text-gray-900 tracking-tight">
               Secure Your <span className="text-purple-600">Financial Future</span> with Finzo
             </h1>
+            
+            <p className="text-lg text-purple-600 font-medium mb-6">
+              By Nimisha Chanda
+            </p>
+
             <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
               Your intelligent financial companion that simplifies taxes, optimizes budgets, and guides investments. Experience the future of personal finance management.
             </p>
