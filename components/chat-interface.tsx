@@ -58,6 +58,7 @@ What's on your mind today? Let's chat! 💭`
       })
 
       if (!response.ok) throw new Error('Failed to fetch response')
+
       const data = await response.json()
       
       if (data.result) {
@@ -65,11 +66,12 @@ What's on your mind today? Let's chat! 💭`
       } else {
         throw new Error('Invalid response format')
       }
+
     } catch (error) {
       console.error('Error:', error)
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "I'm sorry, I encountered an error. Please try again." 
+        content: "Oops! Let me try that again. Could you please rephrase your question? 😊" 
       }])
     } finally {
       setIsLoading(false)
