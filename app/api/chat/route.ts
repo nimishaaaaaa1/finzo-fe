@@ -94,18 +94,28 @@ export async function POST(req: Request) {
     const threadMessages = await openai.beta.threads.messages.list(thread.id)
     const lastMessage = threadMessages.data[0]
 
-    if (!lastMessage?.content?.[0]?.type === 'text') {
+    // Fixed type checking
+    if (!lastMessage?.content?.[0] || lastMessage.content[0].type !== 'text') {
       return NextResponse.json(
         { error: 'Invalid response format' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({
-      result: {
-        content: lastMessage.content[0].text.value
-      }
-    })
+    // Safely access text content
+    const messageContent = lastMessage.content[0]
+    if ('text' in messageContent) {
+      return NextResponse.json({
+        result: {
+          content: messageContent.text.value
+        }
+      })
+    }
+
+    return NextResponse.json(
+      { error: 'Unexpected response format' },
+      { status: 500 }
+    )
 
   } catch (error) {
     console.error('Error in chat API:', error)
