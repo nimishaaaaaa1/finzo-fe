@@ -4,18 +4,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ChatInterface } from '@/components/chat-interface'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 export default function Home() {
-  const { scrollY } = useScroll()
-  const y1 = useTransform(scrollY, [0, 300], [0, 100])
-  const y2 = useTransform(scrollY, [0, 300], [0, -100])
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50">
       {/* Hero Section */}
       <section className="py-24 relative overflow-hidden">
-        {/* Remove the floating watermark images and keep only the grid background */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
         
         <div className="container mx-auto px-4 relative">
