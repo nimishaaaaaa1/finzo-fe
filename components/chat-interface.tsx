@@ -120,19 +120,27 @@ export function ChatInterface() {
                     <ReactMarkdown 
                       className="prose prose-sm max-w-none
                         prose-headings:font-semibold 
-                        prose-h2:text-lg prose-h2:text-purple-900 prose-h2:mt-4 prose-h2:mb-2
-                        prose-h3:text-base prose-h3:text-purple-800 prose-h3:mt-3 prose-h3:mb-2
-                        prose-p:mb-2 prose-p:leading-relaxed
-                        prose-ul:my-2 prose-ul:space-y-1
-                        prose-li:mb-1 prose-li:leading-relaxed
+                        prose-h2:text-xl prose-h2:text-purple-900 prose-h2:mt-8 prose-h2:mb-6
+                        prose-h3:text-lg prose-h3:text-purple-800 prose-h3:mt-6 prose-h3:mb-4
+                        prose-p:text-base prose-p:mb-6 prose-p:leading-relaxed
+                        prose-ul:my-6 prose-ul:space-y-3
+                        prose-li:mb-3 prose-li:leading-relaxed prose-li:pl-4
                         prose-strong:text-purple-900 prose-strong:font-semibold
-                        prose-table:my-2 prose-table:border-collapse
-                        prose-th:py-2 prose-th:px-4 prose-th:bg-purple-50
-                        prose-td:py-2 prose-td:px-4
+                        prose-table:my-6 prose-table:border-collapse prose-table:w-full
+                        prose-th:py-4 prose-th:px-6 prose-th:bg-purple-50/50 prose-th:text-left
+                        prose-td:py-4 prose-td:px-6 prose-td:align-middle
                         first:prose-p:mt-0 last:prose-p:mb-0
                         prose-ul:list-none prose-ul:pl-0
-                        prose-li:before:content-['•'] prose-li:before:text-purple-500 prose-li:before:mr-2
-                        prose-a:text-purple-600 prose-a:no-underline hover:prose-a:underline"
+                        prose-li:before:content-['•'] prose-li:before:text-purple-500 prose-li:before:mr-3 prose-li:before:absolute prose-li:before:-left-1
+                        prose-a:text-purple-600 prose-a:no-underline hover:prose-a:underline
+                        [&>*:first-child]:mt-0 
+                        [&>*:last-child]:mb-0
+                        [&_p]:relative [&_li]:relative
+                        [&_table]:border [&_table]:border-purple-100
+                        [&_tr]:border-b [&_tr]:border-purple-50
+                        [&_th]:font-semibold
+                        [&_td]:text-gray-700
+                        [&>*+*]:mt-6"
                     >
                       {message.content}
                     </ReactMarkdown>
