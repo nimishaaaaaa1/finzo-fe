@@ -12,3 +12,7 @@ body {
   background: var(--primary-bg);
 }
 
+.button {
+  color: white;
+}
+

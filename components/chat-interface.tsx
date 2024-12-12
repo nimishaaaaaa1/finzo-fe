@@ -167,7 +167,7 @@ export function ChatInterface() {
             <Button 
               type="submit"
               disabled={isLoading}
-              className="bg-purple-600 hover:bg-purple-700 rounded-full px-6 sm:px-8 text-sm sm:text-base"
+              className="text-white bg-purple-600 hover:bg-purple-700 rounded-full px-6 sm:px-8 text-sm sm:text-base"
             >
               Send
             </Button>
