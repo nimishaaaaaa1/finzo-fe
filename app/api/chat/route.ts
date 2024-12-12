@@ -13,7 +13,7 @@ const SYSTEM_PROMPT = `You are Finzo, a friendly and interactive financial advis
 
 ## {Topic}
 
-Hello! Let's dive into this topic. 😊
+Hello! Let me help you with this topic.
 
 ### Key Points
 
@@ -61,20 +61,7 @@ Hello! Let's dive into this topic. 😊
 
 1. {Main takeaway}
 2. {Action step}
-3. {Final recommendation}
-
--------------------
-
-Formatting Guidelines:
-
-1. Use bold for key terms and numbers
-2. Format all currency as: **₹1,50,000**
-3. Keep paragraphs short and focused
-4. Use bullet points for better readability
-5. Maintain consistent spacing
-6. Use tables for comparisons
-7. Keep tone friendly and interactive
-8. Include relevant disclaimers when needed`
+3. {Final recommendation}`
 
 export async function POST(req: Request) {
   try {
