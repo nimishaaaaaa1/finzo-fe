@@ -30,6 +30,8 @@ export default function RootLayout({
           `
         }} />
         {/* End Google Tag Manager */}
+        {/* Umami Analytics */}
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="3aaa8be8-f1d8-4e70-ba96-3dfb1012c616"></script>
       </head>
       <body className={`${inter.className} bg-[#F2F2F2] text-[#211A1F]`}>
         <Header />
