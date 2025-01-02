@@ -56,7 +56,7 @@ export function Footer() {
         </div>
       </div>
       <div className="mt-12 text-center border-t border-gray-800 pt-8">
-        <p className="text-gray-400">&copy; 2024 Finzo. All rights reserved.</p>
+        <p className="text-gray-400">&copy; 2025 Finzo. All rights reserved.</p>
       </div>
     </footer>
   )
