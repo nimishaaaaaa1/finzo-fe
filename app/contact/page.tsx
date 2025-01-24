@@ -2,8 +2,26 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
+
+interface ContactForm {
+  name: string
+  email: string
+  message: string
+}
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState<ContactForm>({
+    name: '',
+    email: '',
+    message: ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    // Add form submission logic here
+  }
+
   const socialLinks = [
     {
       name: 'LinkedIn',
@@ -36,53 +54,16 @@ export default function ContactPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 pt-24">
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Contact Us</h1>
-          <p className="text-lg text-purple-600 max-w-2xl mx-auto">Connect with me on social media</p>
-        </div>
-
+        <h1 className="text-4xl font-bold text-center mb-8">Contact Us</h1>
         <div className="max-w-2xl mx-auto">
-          <div className="space-y-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Connect With Me</h2>
-              <div className="space-y-4">
-                {socialLinks.map((link) => (
-                  <a 
-                    key={link.name}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-purple-50 transition-colors"
-                  >
-                    <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${link.bgColor}`}>
-                      <Image src={link.icon} alt={link.name} width={24} height={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{link.name}</h3>
-                      <p className="text-sm text-gray-600">{link.description}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Chat with Finzo CTA */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Need Quick Answers?</h2>
-              <p className="text-gray-600 mb-6">Get instant responses to your financial queries</p>
-              <Link 
-                href="/#chat-section"
-                className="inline-flex items-center justify-center w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200"
-              >
-                Chat with Finzo
-              </Link>
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Form fields */}
+          </form>
         </div>
       </div>
-    </main>
+    </div>
   )
 }
 
