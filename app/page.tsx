@@ -183,6 +183,38 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Calculators Section */}
+      <section className="py-24 bg-white" id="calculators">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-2 justify-center mb-4">
+              <div className="w-2 h-2 bg-purple-200 rounded-full"></div>
+              <h2 className="text-purple-600 font-medium">CALCULATORS</h2>
+              <div className="w-2 h-2 bg-purple-200 rounded-full"></div>
+            </div>
+            <h3 className="text-3xl md:text-4xl font-bold text-center mb-16">
+              Financial Calculators
+            </h3>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {calculators.map((calc) => (
+                <Link
+                  key={calc.id}
+                  href={calc.path}
+                  className="group bg-gradient-to-b from-purple-50 to-white p-8 rounded-2xl hover:shadow-lg transition-all"
+                >
+                  <div className="bg-white p-3 rounded-xl w-12 h-12 flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                    {calc.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{calc.name}</h3>
+                  <p className="text-gray-600">{calc.description}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Chat Interface Section */}
       <section className="py-24 bg-gradient-to-b from-white to-purple-50">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -208,6 +240,51 @@ const services = [
     icon: "📈",
     title: "Investment Strategies",
     description: "Discover smart investment opportunities aligned with your financial goals."
+  }
+]
+
+const calculators = [
+  {
+    id: 'income-tax',
+    name: 'Income Tax Calculator',
+    description: 'Calculate your tax liability for both new & old regime',
+    path: '/calculator/income-tax',
+    icon: '💰'
+  },
+  {
+    id: 'gst',
+    name: 'GST Calculator',
+    description: 'Calculate GST and final price for different rates',
+    path: '/calculator/gst',
+    icon: '📊'
+  },
+  {
+    id: 'tds',
+    name: 'TDS Calculator',
+    description: 'Calculate TDS rates and final deduction amount',
+    path: '/calculator/tds',
+    icon: '📋'
+  },
+  {
+    id: 'sip',
+    name: 'SIP Calculator',
+    description: 'Plan your mutual fund investments',
+    path: '/calculator/sip',
+    icon: '📈'
+  },
+  {
+    id: 'ppf',
+    name: 'PPF Calculator',
+    description: 'Calculate PPF returns over time',
+    path: '/calculator/ppf',
+    icon: '🏦'
+  },
+  {
+    id: 'fd',
+    name: 'FD Calculator',
+    description: 'Calculate fixed deposit returns',
+    path: '/calculator/fd',
+    icon: '💵'
   }
 ]
 
