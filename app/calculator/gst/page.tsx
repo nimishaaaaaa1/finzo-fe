@@ -6,6 +6,16 @@ import Image from 'next/image'
 import Head from 'next/head'
 import Link from 'next/link'
 
+// Add this interface near the top of the file
+interface GSTResult {
+  baseAmount: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  totalAmount: number;
+  gstAmount: number;
+}
+
 // Enhanced GST calculation with more precision
 const calculateGST = (amount: number, rate: number, isInclusive: boolean) => {
   if (isInclusive) {
@@ -43,7 +53,7 @@ export default function GSTCalculatorPage() {
     isInterState: false // New: Toggle between CGST/SGST and IGST
   });
 
-  const result = calculateGST(gstInput.amount, gstInput.rate, gstInput.isInclusive);
+  const [result, setResult] = useState<GSTResult | null>(null);
 
   // Add state for FAQ accordion
   const [openFaq, setOpenFaq] = useState('');
@@ -177,23 +187,23 @@ export default function GSTCalculatorPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Base Amount</span>
-                <span className="font-semibold">₹{result.baseAmount}</span>
+                <span className="font-semibold">₹{result?.baseAmount}</span>
               </div>
               
               {gstInput.isInterState ? (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">IGST ({gstInput.rate}%)</span>
-                  <span className="text-green-600">₹{result.igst}</span>
+                  <span className="text-green-600">₹{result?.igst}</span>
                 </div>
               ) : (
                 <>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">CGST ({gstInput.rate/2}%)</span>
-                    <span className="text-green-600">₹{result.cgst}</span>
+                    <span className="text-green-600">₹{result?.cgst}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">SGST ({gstInput.rate/2}%)</span>
-                    <span className="text-green-600">₹{result.sgst}</span>
+                    <span className="text-green-600">₹{result?.sgst}</span>
                   </div>
                 </>
               )}
@@ -201,7 +211,7 @@ export default function GSTCalculatorPage() {
               <div className="h-px bg-gray-200 my-2"></div>
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>Total Amount</span>
-                <span className="text-purple-600">₹{result.totalAmount}</span>
+                <span className="text-purple-600">₹{result?.totalAmount}</span>
               </div>
             </div>
           </motion.div>
