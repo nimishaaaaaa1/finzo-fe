@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ChatInterface } from '@/components/chat-interface'
 import { motion } from 'framer-motion'
+import GSTCalculator from './components/GSTCalculator'
 
 export default function Home() {
   return (
@@ -219,6 +220,12 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-b from-white to-purple-50">
         <div className="container mx-auto px-4 max-w-4xl">
           <ChatInterface />
+        </div>
+      </section>
+
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <GSTCalculator />
         </div>
       </section>
     </div>
