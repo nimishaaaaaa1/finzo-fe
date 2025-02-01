@@ -6,7 +6,12 @@ import Image from 'next/image';
 
 const IncomeTaxCalculator = () => {
   // State management
-  const [income, setIncome] = useState<number>(0);
+  const [incomeDetails, setIncomeDetails] = useState<IncomeDetails>({
+    salaryIncome: '',  // Changed from 0 to empty string
+    otherIncome: '',   // Changed from 0 to empty string
+    rentalIncome: '',  // Changed from 0 to empty string
+    homeLoanInterest: ''  // Changed from 0 to empty string
+  });
   const [regime, setRegime] = useState<'new' | 'old'>('new');
   const [isSalaried, setIsSalaried] = useState<boolean>(true);
 
@@ -33,7 +38,7 @@ const IncomeTaxCalculator = () => {
   const calculateTax = () => {
     const slabs = regime === 'new' ? newRegimeSlabs : oldRegimeSlabs;
     let tax = 0;
-    let remainingIncome = income;
+    let remainingIncome = calculateTotalIncome();
 
     // Standard Deduction
     if (isSalaried) {
@@ -49,9 +54,9 @@ const IncomeTaxCalculator = () => {
     }
 
     // Section 87A Rebate
-    if (regime === 'new' && income <= 1200000) {
+    if (regime === 'new' && calculateTotalIncome() <= 1200000) {
       tax = 0; // No tax up to 12 lakhs in new regime
-    } else if (regime === 'old' && income <= 500000) {
+    } else if (regime === 'old' && calculateTotalIncome() <= 500000) {
       tax = 0; // No tax up to 5 lakhs in old regime
     }
 
@@ -63,15 +68,74 @@ const IncomeTaxCalculator = () => {
       <h2 className="text-2xl font-bold mb-6 text-center">Income Tax Calculator 2025-26</h2>
       
       <div className="space-y-6">
-        {/* Income Input */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Annual Income (₹)</label>
-          <input
-            type="number"
-            value={income}
-            onChange={(e) => setIncome(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Income Details</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Annual Salary Income
+              </label>
+              <input
+                type="number"
+                value={incomeDetails.salaryIncome}
+                onChange={(e) => setIncomeDetails({
+                  ...incomeDetails,
+                  salaryIncome: e.target.value  // Remove Number() conversion
+                })}
+                placeholder="Enter your annual salary"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Other Income Sources
+              </label>
+              <input
+                type="number"
+                value={incomeDetails.otherIncome}
+                onChange={(e) => setIncomeDetails({
+                  ...incomeDetails,
+                  otherIncome: e.target.value
+                })}
+                placeholder="Enter other income"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rental Income (if any)
+              </label>
+              <input
+                type="number"
+                value={incomeDetails.rentalIncome}
+                onChange={(e) => setIncomeDetails({
+                  ...incomeDetails,
+                  rentalIncome: e.target.value
+                })}
+                placeholder="Enter rental income"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Home Loan Interest
+              </label>
+              <input
+                type="number"
+                value={incomeDetails.homeLoanInterest}
+                onChange={(e) => setIncomeDetails({
+                  ...incomeDetails,
+                  homeLoanInterest: e.target.value
+                })}
+                placeholder="Enter home loan interest"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Regime Selection */}
@@ -133,6 +197,23 @@ const IncomeTaxCalculator = () => {
         Source: Union Budget 2025-26 Announcements
       </div>
     </div>
+  );
+};
+
+// Update the interface to accept string values
+interface IncomeDetails {
+  salaryIncome: string;
+  otherIncome: string;
+  rentalIncome: string;
+  homeLoanInterest: string;
+}
+
+// When calculating, convert strings to numbers
+const calculateTotalIncome = () => {
+  return (
+    Number(incomeDetails.salaryIncome || 0) +
+    Number(incomeDetails.otherIncome || 0) +
+    Number(incomeDetails.rentalIncome || 0)
   );
 };
 

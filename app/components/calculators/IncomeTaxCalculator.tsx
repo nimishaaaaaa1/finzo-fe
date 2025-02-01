@@ -4,10 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface IncomeDetails {
-  salaryIncome: number;
-  otherIncome: number;
-  rentalIncome: number;
-  homeLoanInterest: number;
+  salaryIncome: string;
+  otherIncome: string;
+  rentalIncome: string;
 }
 
 const IncomeTaxCalculator = () => {
@@ -18,10 +17,9 @@ const IncomeTaxCalculator = () => {
 
   // Income Details State
   const [incomeDetails, setIncomeDetails] = useState<IncomeDetails>({
-    salaryIncome: 0,
-    otherIncome: 0,
-    rentalIncome: 0,
-    homeLoanInterest: 0
+    salaryIncome: '',
+    otherIncome: '',
+    rentalIncome: ''
   });
 
   // Tax Calculation State
@@ -36,9 +34,9 @@ const IncomeTaxCalculator = () => {
   // Calculate total income
   const calculateTotalIncome = () => {
     return (
-      incomeDetails.salaryIncome +
-      incomeDetails.otherIncome +
-      incomeDetails.rentalIncome
+      Number(incomeDetails.salaryIncome) +
+      Number(incomeDetails.otherIncome) +
+      Number(incomeDetails.rentalIncome)
     );
   };
 
@@ -46,12 +44,12 @@ const IncomeTaxCalculator = () => {
   const calculateTaxableIncome = (totalIncome: number) => {
     let taxableIncome = totalIncome;
     
-    if (incomeDetails.salaryIncome > 0) {
+    if (Number(incomeDetails.salaryIncome) > 0) {
       taxableIncome -= 75000; // Standard deduction
     }
     
     if (taxRegime === 'old') {
-      taxableIncome -= Math.min(incomeDetails.homeLoanInterest, 200000); // Home loan interest deduction
+      taxableIncome -= Math.min(Number(incomeDetails.homeLoanInterest), 200000); // Home loan interest deduction
     }
     
     return Math.max(0, taxableIncome);
@@ -105,188 +103,198 @@ const IncomeTaxCalculator = () => {
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      {/* Left Column - Input Fields */}
-      <div className="space-y-6">
-        {/* Basic Details */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Basic Details</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Assessment Year
-              </label>
-              <select
-                value={assessmentYear}
-                onChange={(e) => setAssessmentYear(e.target.value)}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="2025-26">2025-26 (FY 2024-25)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tax Regime
-              </label>
-              <select
-                value={taxRegime}
-                onChange={(e) => setTaxRegime(e.target.value as 'new' | 'old')}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="new">New Tax Regime</option>
-                <option value="old">Old Tax Regime</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Age Category
-              </label>
-              <select
-                value={ageCategory}
-                onChange={(e) => setAgeCategory(e.target.value as 'below60' | '60to80' | 'above80')}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="below60">Below 60 years</option>
-                <option value="60to80">60 to 80 years</option>
-                <option value="above80">Above 80 years</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Income Details */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Income Details</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Annual Salary Income
-              </label>
-              <input
-                type="number"
-                value={incomeDetails.salaryIncome}
-                onChange={(e) => setIncomeDetails({
-                  ...incomeDetails,
-                  salaryIncome: Number(e.target.value)
-                })}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Other Income Sources
-              </label>
-              <input
-                type="number"
-                value={incomeDetails.otherIncome}
-                onChange={(e) => setIncomeDetails({
-                  ...incomeDetails,
-                  otherIncome: Number(e.target.value)
-                })}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rental Income (if any)
-              </label>
-              <input
-                type="number"
-                value={incomeDetails.rentalIncome}
-                onChange={(e) => setIncomeDetails({
-                  ...incomeDetails,
-                  rentalIncome: Number(e.target.value)
-                })}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-
-            {taxRegime === 'old' && (
+    <>
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Left Column - Input Fields */}
+        <div className="space-y-6">
+          {/* Basic Details */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold mb-4">Basic Details</h2>
+            
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Home Loan Interest
+                  Assessment Year
+                </label>
+                <select
+                  value={assessmentYear}
+                  onChange={(e) => setAssessmentYear(e.target.value)}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="2025-26">2025-26 (FY 2024-25)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tax Regime
+                </label>
+                <select
+                  value={taxRegime}
+                  onChange={(e) => setTaxRegime(e.target.value as 'new' | 'old')}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="new">New Tax Regime</option>
+                  <option value="old">Old Tax Regime</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Age Category
+                </label>
+                <select
+                  value={ageCategory}
+                  onChange={(e) => setAgeCategory(e.target.value as 'below60' | '60to80' | 'above80')}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="below60">Below 60 years</option>
+                  <option value="60to80">60 to 80 years</option>
+                  <option value="above80">Above 80 years</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Income Details */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold mb-4">Income Details</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="salaryIncome" className="block text-gray-700 text-sm font-medium mb-2">
+                  Annual Salary Income
                 </label>
                 <input
+                  id="salaryIncome"
                   type="number"
-                  value={incomeDetails.homeLoanInterest}
-                  onChange={(e) => setIncomeDetails({
-                    ...incomeDetails,
-                    homeLoanInterest: Number(e.target.value)
-                  })}
-                  className="w-full p-2 border rounded-lg"
+                  inputMode="numeric"
+                  placeholder="Enter annual salary"
+                  value={incomeDetails.salaryIncome}
+                  onChange={(e) => setIncomeDetails(prev => ({
+                    ...prev,
+                    salaryIncome: e.target.value
+                  }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-            )}
+
+              <div>
+                <label htmlFor="otherIncome" className="block text-gray-700 text-sm font-medium mb-2">
+                  Other Income Sources
+                </label>
+                <input
+                  id="otherIncome"
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="Enter other income"
+                  value={incomeDetails.otherIncome}
+                  onChange={(e) => setIncomeDetails(prev => ({
+                    ...prev,
+                    otherIncome: e.target.value
+                  }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="rentalIncome" className="block text-gray-700 text-sm font-medium mb-2">
+                  Rental Income (if any)
+                </label>
+                <input
+                  id="rentalIncome"
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="Enter rental income"
+                  value={incomeDetails.rentalIncome}
+                  onChange={(e) => setIncomeDetails(prev => ({
+                    ...prev,
+                    rentalIncome: e.target.value
+                  }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {taxRegime === 'old' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Home Loan Interest
+                  </label>
+                  <input
+                    type="number"
+                    value={incomeDetails.homeLoanInterest}
+                    onChange={(e) => setIncomeDetails({
+                      ...incomeDetails,
+                      homeLoanInterest: e.target.value
+                    })}
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Tax Summary */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold mb-6">Tax Summary</h2>
+          
+          <div className="space-y-6">
+            {/* Income Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Income</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Salary Income</span>
+                  <span>₹{Number(incomeDetails.salaryIncome || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Other Sources</span>
+                  <span>₹{Number(incomeDetails.otherIncome || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Rental Income</span>
+                  <span>₹{Number(incomeDetails.rentalIncome || 0).toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tax Calculation */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Tax Calculation</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Taxable Income</span>
+                  <span>₹{taxSummary.taxableIncome.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Income Tax</span>
+                  <span>₹{taxSummary.incomeTax.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Health & Education Cess (4%)</span>
+                  <span>₹{taxSummary.cess.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                  <span>Total Tax Liability</span>
+                  <span className="text-blue-600">
+                    ₹{taxSummary.totalTaxLiability.toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Calculate Button */}
+            <button
+              onClick={handleRecalculate}
+              className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Calculate Tax
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Right Column - Tax Summary */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold mb-6">Tax Summary</h2>
-        
-        {/* Income Summary */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3">Income</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Salary Income</span>
-              <span>₹{incomeDetails.salaryIncome.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Other Sources</span>
-              <span>₹{incomeDetails.otherIncome.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Rental Income</span>
-              <span>₹{incomeDetails.rentalIncome.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between font-semibold border-t pt-2">
-              <span>Total Income</span>
-              <span>₹{taxSummary.totalIncome.toLocaleString('en-IN')}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tax Calculation */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3">Tax Calculation</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Taxable Income</span>
-              <span>₹{taxSummary.taxableIncome.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Income Tax</span>
-              <span>₹{taxSummary.incomeTax.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Health & Education Cess (4%)</span>
-              <span>₹{taxSummary.cess.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between font-semibold text-lg border-t pt-2">
-              <span>Total Tax Liability</span>
-              <span className="text-blue-600">
-                ₹{taxSummary.totalTaxLiability.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <button
-          onClick={handleRecalculate}
-          className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-        >
-          Recalculate
-        </button>
-      </div>
-    </div>
+    </>
   );
 };
 
