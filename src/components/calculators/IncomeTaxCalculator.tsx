@@ -13,17 +13,17 @@ const IncomeTaxCalculator = () => {
     homeLoanInterest: ''  // Changed from 0 to empty string
   });
   const [regime, setRegime] = useState<'new' | 'old'>('new');
-  const [isSalaried, setIsSalaried] = useState<boolean>(true);
+  const [employmentType, setEmploymentType] = useState<'salaried' | 'pensioner' | 'business'>('salaried');
+  const isSalaried = employmentType === 'salaried';
+  const isPensioner = employmentType === 'pensioner';
 
-  // Updated tax slabs for 2025-26 (New Regime)
+  // Update the tax slabs with correct rates and ranges
   const newRegimeSlabs = [
-    { min: 0, max: 400000, rate: 0 },
-    { min: 400000, max: 800000, rate: 5 },
-    { min: 800000, max: 1200000, rate: 10 },
-    { min: 1200000, max: 1600000, rate: 15 },
-    { min: 1600000, max: 2000000, rate: 20 },
-    { min: 2000000, max: 2400000, rate: 25 },
-    { min: 2400000, max: Infinity, rate: 30 }
+    { min: 0, max: 1200000, rate: 0 },          // No tax up to ₹12L
+    { min: 1200001, max: 1500000, rate: 0.10 }, // 10% for ₹12L-₹15L
+    { min: 1500001, max: 2000000, rate: 0.15 }, // 15% for ₹15L-₹20L
+    { min: 2000001, max: 3000000, rate: 0.20 }, // 20% for ₹20L-₹30L
+    { min: 3000001, max: Infinity, rate: 0.30 }  // 30% above ₹30L
   ];
 
   // Old Regime Slabs
@@ -36,31 +36,43 @@ const IncomeTaxCalculator = () => {
 
   // Calculate tax based on regime and income
   const calculateTax = () => {
-    const slabs = regime === 'new' ? newRegimeSlabs : oldRegimeSlabs;
     let tax = 0;
     let remainingIncome = calculateTotalIncome();
+    
+    // Apply standard deduction for salaried/pensioners
+    const standardDeduction = (isSalaried || isPensioner) ? 75000 : 0;
+    const taxableIncome = Math.max(0, remainingIncome - standardDeduction);
 
-    // Standard Deduction
-    if (isSalaried) {
-      remainingIncome -= 75000; // Rs 75,000 standard deduction
+    // No tax if income within limits
+    if ((isSalaried || isPensioner) && remainingIncome <= 1275000) {
+      return {
+        taxableIncome,
+        standardDeduction,
+        tax: 0,
+        cess: 0,
+        totalTax: 0
+      };
     }
 
     // Calculate tax slab-wise
-    for (const slab of slabs) {
-      if (remainingIncome > slab.min) {
-        const taxableInThisSlab = Math.min(remainingIncome - slab.min, slab.max - slab.min);
-        tax += (taxableInThisSlab * slab.rate) / 100;
+    for (const slab of newRegimeSlabs) {
+      if (taxableIncome > slab.min) {
+        const taxableAmount = Math.min(taxableIncome, slab.max) - slab.min;
+        tax += taxableAmount * slab.rate;
+      } else {
+        break;
       }
     }
 
-    // Section 87A Rebate
-    if (regime === 'new' && calculateTotalIncome() <= 1200000) {
-      tax = 0; // No tax up to 12 lakhs in new regime
-    } else if (regime === 'old' && calculateTotalIncome() <= 500000) {
-      tax = 0; // No tax up to 5 lakhs in old regime
-    }
+    const cess = tax * 0.04; // 4% cess
 
-    return tax;
+    return {
+      taxableIncome,
+      standardDeduction,
+      tax,
+      cess,
+      totalTax: tax + cess
+    };
   };
 
   // Add the function inside the component
@@ -164,39 +176,88 @@ const IncomeTaxCalculator = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700">Employment Type</label>
           <select
-            value={isSalaried ? 'salaried' : 'non-salaried'}
-            onChange={(e) => setIsSalaried(e.target.value === 'salaried')}
+            value={employmentType}
+            onChange={(e) => setEmploymentType(e.target.value as 'salaried' | 'pensioner' | 'business')}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="salaried">Salaried</option>
-            <option value="non-salaried">Non-Salaried</option>
+            <option value="pensioner">Pensioner</option>
+            <option value="business">Business/Self-Employed</option>
           </select>
+          {employmentType === 'business' && regime === 'new' && (
+            <p className="text-sm text-amber-600 mt-1">
+              Note:  is not applicable for business income
+            </p>
+          )}
         </div>
 
         {/* Tax Calculation Result */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold">Estimated Tax: ₹{calculateTax().toLocaleString()}</h3>
+          <h3 className="text-lg font-semibold mb-4">Tax Summary (FY 2025-26)</h3>
+          <div className="space-y-2">
+            {/* Income Section */}
+            <h4 className="font-medium">Income</h4>
+            <div className="flex justify-between">
+              <span>Salary Income</span>
+              <span>₹{Number(incomeDetails.salaryIncome || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Other Sources</span>
+              <span>₹{Number(incomeDetails.otherIncome || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Rental Income</span>
+              <span>₹{Number(incomeDetails.rentalIncome || 0).toLocaleString()}</span>
+            </div>
+            
+            {/* Deductions Section - Updated  amount */}
+            <div className="h-px bg-gray-200 my-2"></div>
+            <h4 className="font-medium">Deductions</h4>
+            {(isSalaried || isPensioner) && (
+              <div className="flex justify-between text-green-600">
+                <span></span>
+                <span>- ₹75,000</span>
+              </div>
+            )}
+
+            {/* Tax Calculation */}
+            <div className="h-px bg-gray-200 my-2"></div>
+            <h4 className="font-medium">Tax Calculation</h4>
+            <div className="flex justify-between">
+              <span>Taxable Income</span>
+              <span>₹{calculateTax().taxableIncome.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Income Tax</span>
+              <span>₹{calculateTax().tax.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Health & Education Cess (4%)</span>
+              <span>₹{calculateTax().cess.toLocaleString()}</span>
+            </div>
+            <div className="h-px bg-gray-200 my-2"></div>
+            <div className="flex justify-between font-bold">
+              <span>Total Tax Liability</span>
+              <span className="text-purple-600">₹{calculateTax().totalTax.toLocaleString()}</span>
+            </div>
+          </div>
         </div>
 
         {/* Key Features */}
         <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-3">Budget 2025 Key Updates</h3>
+          <h3 className="text-lg font-semibold mb-3">Budget 2025  Updates</h3>
           <ul className="space-y-2 text-sm">
             <li className="flex items-start">
               <span className="text-green-500 mr-2">✓</span>
-              No tax up to ₹12 lakh income in new regime (₹12.75 lakh for salaried)
+              ₹75,000  for salaried/pensioners
+            </li>
+            <li className="flex items-start">
+              <span className="text-amber-500 mr-2">!</span>
+              Not applicable for business/self-employed income
             </li>
             <li className="flex items-start">
               <span className="text-green-500 mr-2">✓</span>
-              New 25% tax slab for income between ₹20-24 lakh
-            </li>
-            <li className="flex items-start">
-              <span className="text-green-500 mr-2">✓</span>
-              Standard deduction of ₹75,000 available in both regimes
-            </li>
-            <li className="flex items-start">
-              <span className="text-green-500 mr-2">✓</span>
-              TDS limit for senior citizens doubled to ₹1 lakh
+              Effectively no tax up to ₹12.75L for salaried (new regime)
             </li>
           </ul>
         </div>

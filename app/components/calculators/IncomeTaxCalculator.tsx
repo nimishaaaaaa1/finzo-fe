@@ -272,7 +272,7 @@ const IncomeTaxCalculator = () => {
                 <div className="flex justify-between">
                   <span>Standard Deduction</span>
                   <span className="text-green-600">
-                    - ₹{(Number(incomeDetails.salaryIncome) > 0 ? 50000 : 0).toLocaleString('en-IN')}
+                    - ₹{(Number(incomeDetails.salaryIncome) > 0 ? 75000 : 0).toLocaleString('en-IN')}
                   </span>
                 </div>
                 {Number(incomeDetails.homeLoanInterest) > 0 && (
