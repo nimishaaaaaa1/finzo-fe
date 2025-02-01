@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ChatInterface } from '@/components/chat-interface'
 import { motion } from 'framer-motion'
-import GSTCalculator from './components/GSTCalculator'
 
 export default function Home() {
   return (
@@ -222,12 +221,6 @@ export default function Home() {
           <ChatInterface />
         </div>
       </section>
-
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <GSTCalculator />
-        </div>
-      </section>
     </div>
   )
 }
@@ -271,27 +264,6 @@ const calculators = [
     description: 'Calculate TDS rates and final deduction amount',
     path: '/calculator/tds',
     icon: '📋'
-  },
-  {
-    id: 'sip',
-    name: 'SIP Calculator',
-    description: 'Plan your mutual fund investments',
-    path: '/calculator/sip',
-    icon: '📈'
-  },
-  {
-    id: 'ppf',
-    name: 'PPF Calculator',
-    description: 'Calculate PPF returns over time',
-    path: '/calculator/ppf',
-    icon: '🏦'
-  },
-  {
-    id: 'fd',
-    name: 'FD Calculator',
-    description: 'Calculate fixed deposit returns',
-    path: '/calculator/fd',
-    icon: '💵'
   }
 ]
 

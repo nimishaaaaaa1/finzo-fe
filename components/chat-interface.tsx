@@ -2,180 +2,191 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import ReactMarkdown from 'react-markdown'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const SAMPLE_PROMPTS = [
-  {
-    text: "Explain the difference between the old and new tax regime",
-    category: "Taxation"
-  },
-  {
-    text: "Suggest good investments for a Balanced investor",
-    category: "Investment"
-  },
-  {
-    text: "I have an SIP of Rs 5000 per month but I also invest in stocks",
-    category: "Portfolio"
-  },
-  {
-    text: "Which small-cap mutual funds are best for me to invest in 2024?",
-    category: "Mutual Funds"
-  }
-]
-
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
+// Define tax slab structure
+interface TaxSlab {
+  min: number;
+  max: number;
+  rate: number;
 }
 
+// Updated tax slabs for both regimes
+const newRegimeSlabs: TaxSlab[] = [
+  { min: 0, max: 1200000, rate: 0 },
+  { min: 1200001, max: 1500000, rate: 0.10 },
+  { min: 1500001, max: 2000000, rate: 0.15 },
+  { min: 2000001, max: 3000000, rate: 0.20 },
+  { min: 3000001, max: Infinity, rate: 0.30 }
+];
+
+const oldRegimeSlabs: TaxSlab[] = [
+  { min: 0, max: 250000, rate: 0 },
+  { min: 250001, max: 500000, rate: 0.05 },
+  { min: 500001, max: 1000000, rate: 0.20 },
+  { min: 1000001, max: Infinity, rate: 0.30 }
+];
+
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: `Hi! I'm Finzo, your AI financial guide. I can help you with:
+
+• Tax calculations and planning
+• Investment advice and strategies
+• Budgeting and savings tips
+• Latest financial updates
+
+What would you like to know about?`
+    }
+  ])
+
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent | string) => {
-    if (typeof e === 'string') {
-      sendMessage(e)
-    } else {
-      e.preventDefault()
-      if (input.trim()) {
-        sendMessage(input)
-        setInput('')
-      }
-    }
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim()) return
 
-  const sendMessage = async (content: string) => {
+    const userMessage = input.trim()
+    setInput('')
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
-    const newMessage: Message = { role: 'user', content }
-    setMessages(prev => [...prev, newMessage])
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, newMessage] }),
-      })
+    let response = ''
+    const lowerCaseInput = userMessage.toLowerCase()
 
-      if (!response.ok) throw new Error('Failed to fetch response')
+    if (lowerCaseInput.includes('which regime') || lowerCaseInput.includes('better')) {
+      response = `Let me help you choose the best tax regime for FY 2025-26:
 
-      const data = await response.json()
-      if (data.result) {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: data.result.content 
-        }])
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "I encountered an error. Please try again." 
-      }])
-    } finally {
-      setIsLoading(false)
+NEW REGIME benefits:
+✓ No tax up to ₹12L (₹12.75L for salaried)
+✓ Higher standard deduction (₹75,000)
+✓ Lower tax rates overall
+✗ No additional deductions available
+
+OLD REGIME benefits:
+✓ Standard deduction: ₹50,000 (unchanged)
+✓ Comprehensive deductions:
+  • Section 80C: ₹1.5L
+  • Section 80D: Health Insurance
+  • HRA Benefits
+  • Home Loan Benefits
+  • NPS Benefits
+
+The old regime might be better if you:
+• Have high HRA claims
+• Maximize 80C investments
+• Pay home loan EMIs
+• Have medical insurance
+
+Would you like me to calculate your tax under both regimes?`
+    } 
+    else if (lowerCaseInput.includes('old regime')) {
+      response = `Old Tax Regime for FY 2025-26:
+
+Tax Slabs:
+• Up to ₹2.5L → 0%
+• ₹2.5L to ₹5L → 5%
+• ₹5L to ₹10L → 20%
+• Above ₹10L → 30%
+
+Key Features:
+✓ Standard Deduction: ₹50,000
+✓ Section 80C: Up to ₹1.5L
+✓ Section 80D: Health Insurance
+✓ HRA and other exemptions available
+✓ Rebate u/s 87A up to ₹5L income
+
+Would you like to calculate your tax liability?`
     }
+    else if (lowerCaseInput.includes('new regime')) {
+      response = `New Tax Regime for FY 2025-26:
+
+Tax Slabs:
+• Up to ₹12L → 0%
+• ₹12L to ₹15L → 10%
+• ₹15L to ₹20L → 15%
+• ₹20L to ₹30L → 20%
+• Above ₹30L → 30%
+
+Key Benefits:
+✓ Higher Standard Deduction: ₹75,000
+✓ No tax up to ₹12.75L for salaried
+✓ Simplified tax structure
+✓ Lower tax rates
+
+Shall I help you calculate your tax?`
+    }
+    else if (lowerCaseInput.includes('deduction')) {
+      response = `Standard Deduction & Benefits (FY 2025-26):
+
+NEW REGIME:
+✓ ₹75,000 standard deduction for salaried/pensioners
+✓ Makes income up to ₹12.75L tax-free
+✗ No additional deductions available
+
+OLD REGIME:
+✓ ₹50,000 standard deduction (unchanged)
+✓ Major deductions available:
+  • Section 80C: Up to ₹1.5L
+    - PPF, ELSS, EPF, Life Insurance
+    - Home Loan Principal, Tuition Fees
+  • Section 80D: Health Insurance
+    - Self & Family: Up to ₹25,000
+    - Parents: Up to ₹50,000
+  • HRA Benefits
+  • Home Loan Interest: Up to ₹2L
+  • NPS: Additional ₹50,000 u/s 80CCD(1B)
+
+Would you like me to calculate your tax savings with these deductions?`
+    }
+
+    setMessages(prev => [...prev, { role: 'assistant', content: response }])
+    setIsLoading(false)
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-4 sm:mb-6">
-        <h1 className="text-4xl sm:text-5xl font-bold text-purple-600 mb-1 sm:mb-2">Ask Finzo</h1>
-        <p className="text-lg sm:text-xl text-purple-600">Your Financial Guide</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 py-24">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-purple-600 mb-4">Ask Finzo</h1>
+          <p className="text-xl text-gray-600">Your Financial Guide</p>
+        </div>
 
-      <div className="bg-white rounded-[32px] sm:rounded-[40px] shadow-xl border border-purple-100/50">
-        {messages.length === 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-4 sm:p-6">
-            {SAMPLE_PROMPTS.map((prompt, index) => (
-              <button
-                key={index}
-                onClick={() => handleSubmit(prompt.text)}
-                className="group bg-white p-4 rounded-2xl text-left border border-gray-100 hover:shadow-sm transition-all"
-              >
-                <p className="text-gray-900 text-sm sm:text-base mb-2">{prompt.text}</p>
-                <span className="text-purple-500 text-xs sm:text-sm font-medium">{prompt.category}</span>
-              </button>
-            ))}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold mb-2">Explain the difference between the old and new tax regime</h3>
+            <p className="text-purple-600">Taxation</p>
           </div>
-        )}
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold mb-2">Suggest good investments for a Balanced investor</h3>
+            <p className="text-purple-600">Investment</p>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold mb-2">I have an SIP of Rs 5000 per month but I also invest in stocks</h3>
+            <p className="text-purple-600">Portfolio</p>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold mb-2">Which small-cap mutual funds are best for me to invest in 2024?</h3>
+            <p className="text-purple-600">Mutual Funds</p>
+          </div>
+        </div>
 
-        {messages.length > 0 && (
-          <ScrollArea className="px-4 sm:px-6 py-4 h-[350px] sm:h-[400px]">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`mb-4 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
-              >
-                <div
-                  className={`inline-block p-4 rounded-2xl max-w-[85%] ${
-                    message.role === 'user'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-50 text-gray-900'
-                  }`}
-                >
-                  {message.role === 'assistant' ? (
-                    <ReactMarkdown 
-                      className="prose prose-sm max-w-none
-                        prose-headings:font-semibold 
-                        prose-h2:text-xl prose-h2:text-purple-900 prose-h2:mt-8 prose-h2:mb-6
-                        prose-h3:text-lg prose-h3:text-purple-800 prose-h3:mt-6 prose-h3:mb-4
-                        prose-p:text-base prose-p:mb-6 prose-p:leading-relaxed
-                        prose-ul:my-6 prose-ul:space-y-3
-                        prose-li:mb-3 prose-li:leading-relaxed prose-li:pl-4
-                        prose-strong:text-purple-900 prose-strong:font-semibold
-                        prose-table:my-6 prose-table:border-collapse prose-table:w-full
-                        prose-th:py-4 prose-th:px-6 prose-th:bg-purple-50/50 prose-th:text-left
-                        prose-td:py-4 prose-td:px-6 prose-td:align-middle
-                        first:prose-p:mt-0 last:prose-p:mb-0
-                        prose-ul:list-none prose-ul:pl-0
-                        prose-li:before:content-['•'] prose-li:before:text-purple-500 prose-li:before:mr-3 prose-li:before:absolute prose-li:before:-left-1
-                        prose-a:text-purple-600 prose-a:no-underline hover:prose-a:underline
-                        [&>*:first-child]:mt-0 
-                        [&>*:last-child]:mb-0
-                        [&_p]:relative [&_li]:relative
-                        [&_table]:border [&_table]:border-purple-100
-                        [&_tr]:border-b [&_tr]:border-purple-50
-                        [&_th]:font-semibold
-                        [&_td]:text-gray-700
-                        [&>*+*]:mt-6"
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  ) : (
-                    <p className="leading-relaxed">{message.content}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="text-left mb-4">
-                <div className="inline-block p-4 rounded-2xl bg-gray-50">
-                  <div className="flex gap-2 items-center">
-                    <div className="w-2 h-2 bg-purple-600/60 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <div className="w-2 h-2 bg-purple-600/60 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <div className="w-2 h-2 bg-purple-600/60 rounded-full animate-bounce" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </ScrollArea>
-        )}
-
-        <div className="p-4 sm:p-6 pt-0">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-gray-50/80 p-2 rounded-full border border-gray-100">
-            <Input
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <form onSubmit={handleSubmit} className="flex gap-4">
+            <input
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me anything about Indian finance..."
-              className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-2 text-sm sm:text-base placeholder:text-gray-400"
+              className="flex-1 rounded-lg border p-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <Button 
               type="submit"
               disabled={isLoading}
-              className="text-white bg-purple-600 hover:bg-purple-700 rounded-full px-6 sm:px-8 text-sm sm:text-base"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8"
             >
               Send
             </Button>
@@ -184,5 +195,10 @@ export function ChatInterface() {
       </div>
     </div>
   )
+}
+
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
 }
 
