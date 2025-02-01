@@ -7,6 +7,7 @@ interface IncomeDetails {
   salaryIncome: string;
   otherIncome: string;
   rentalIncome: string;
+  homeLoanInterest: string;
 }
 
 const IncomeTaxCalculator = () => {
@@ -19,7 +20,8 @@ const IncomeTaxCalculator = () => {
   const [incomeDetails, setIncomeDetails] = useState<IncomeDetails>({
     salaryIncome: '',
     otherIncome: '',
-    rentalIncome: ''
+    rentalIncome: '',
+    homeLoanInterest: ''
   });
 
   // Tax Calculation State
@@ -215,22 +217,26 @@ const IncomeTaxCalculator = () => {
                 />
               </div>
 
-              {taxRegime === 'old' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Home Loan Interest
-                  </label>
-                  <input
-                    type="number"
-                    value={incomeDetails.homeLoanInterest}
-                    onChange={(e) => setIncomeDetails({
-                      ...incomeDetails,
-                      homeLoanInterest: e.target.value
-                    })}
-                    className="w-full p-2 border rounded-lg"
-                  />
-                </div>
-              )}
+              <div>
+                <label htmlFor="homeLoanInterest" className="block text-gray-700 text-sm font-medium mb-2">
+                  Home Loan Interest Paid
+                </label>
+                <input
+                  id="homeLoanInterest"
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="Enter home loan interest paid"
+                  value={incomeDetails.homeLoanInterest}
+                  onChange={(e) => setIncomeDetails(prev => ({
+                    ...prev,
+                    homeLoanInterest: e.target.value
+                  }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Maximum deduction allowed: ₹2,00,000
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -256,6 +262,27 @@ const IncomeTaxCalculator = () => {
                   <span>Rental Income</span>
                   <span>₹{Number(incomeDetails.rentalIncome || 0).toLocaleString('en-IN')}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Deductions Section */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Deductions</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Standard Deduction</span>
+                  <span className="text-green-600">
+                    - ₹{(Number(incomeDetails.salaryIncome) > 0 ? 50000 : 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                {Number(incomeDetails.homeLoanInterest) > 0 && (
+                  <div className="flex justify-between">
+                    <span>Home Loan Interest</span>
+                    <span className="text-green-600">
+                      - ₹{Math.min(Number(incomeDetails.homeLoanInterest), 200000).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

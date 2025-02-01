@@ -63,6 +63,15 @@ const IncomeTaxCalculator = () => {
     return tax;
   };
 
+  // Add the function inside the component
+  const calculateTotalIncome = () => {
+    return (
+      Number(incomeDetails.salaryIncome || 0) +
+      Number(incomeDetails.otherIncome || 0) +
+      Number(incomeDetails.rentalIncome || 0)
+    );
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">Income Tax Calculator 2025-26</h2>
@@ -207,14 +216,5 @@ interface IncomeDetails {
   rentalIncome: string;
   homeLoanInterest: string;
 }
-
-// When calculating, convert strings to numbers
-const calculateTotalIncome = () => {
-  return (
-    Number(incomeDetails.salaryIncome || 0) +
-    Number(incomeDetails.otherIncome || 0) +
-    Number(incomeDetails.rentalIncome || 0)
-  );
-};
 
 export default IncomeTaxCalculator; 
