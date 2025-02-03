@@ -1,140 +1,209 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
+interface TaxResult {
+  taxableIncome: number;
+  totalTax: number;
+  cess: number;
+  effectiveRate: number;
+  slabwiseBreakup: {
+    slab: string;
+    rate: string;
+    amount: number;
+    tax: number;
+  }[];
+}
 
 interface IncomeDetails {
-  salaryIncome: string;
-  otherIncome: string;
-  rentalIncome: string;
+  salary: string;
+  otherSources: string;
+  rental: string;
   homeLoanInterest: string;
 }
 
-const IncomeTaxCalculator = () => {
-  // Basic Details State
-  const [assessmentYear, setAssessmentYear] = useState<string>('2025-26');
-  const [taxRegime, setTaxRegime] = useState<'new' | 'old'>('new');
-  const [ageCategory, setAgeCategory] = useState<'below60' | '60to80' | 'above80'>('below60');
-
-  // Income Details State
-  const [incomeDetails, setIncomeDetails] = useState<IncomeDetails>({
-    salaryIncome: '',
-    otherIncome: '',
-    rentalIncome: '',
-    homeLoanInterest: ''
+export default function IncomeTaxCalculator() {
+  const [result, setResult] = useState<TaxResult | null>(null);
+  const [formData, setFormData] = useState({
+    assessmentYear: '2025-26',
+    regime: 'new',
+    ageGroup: '0-60',
+    income: {
+      salary: '',
+      otherSources: '',
+      rental: '',
+      homeLoanInterest: ''
+    }
   });
 
-  // Tax Calculation State
-  const [taxSummary, setTaxSummary] = useState({
-    totalIncome: 0,
-    taxableIncome: 0,
-    incomeTax: 0,
-    cess: 0,
-    totalTaxLiability: 0
-  });
-
-  // Calculate total income
-  const calculateTotalIncome = () => {
-    return (
-      Number(incomeDetails.salaryIncome) +
-      Number(incomeDetails.otherIncome) +
-      Number(incomeDetails.rentalIncome)
-    );
+  // Add this helper function for Indian number formatting
+  const formatIndianNumber = (num: number): string => {
+    const formatted = num.toLocaleString('en-IN', {
+      maximumFractionDigits: 0,
+      style: 'decimal'
+    });
+    return `₹${formatted}`;
   };
 
-  // Calculate taxable income (with standard deduction for salary)
-  const calculateTaxableIncome = (totalIncome: number) => {
-    let taxableIncome = totalIncome;
-    
-    if (Number(incomeDetails.salaryIncome) > 0) {
-      taxableIncome -= 75000; // Standard deduction
-    }
-    
-    if (taxRegime === 'old') {
-      taxableIncome -= Math.min(Number(incomeDetails.homeLoanInterest), 200000); // Home loan interest deduction
-    }
-    
-    return Math.max(0, taxableIncome);
+  // Update the formatCurrency function
+  const formatCurrency = (value: string) => {
+    // Remove all non-digit characters
+    const number = value.replace(/[^\d]/g, '');
+    // Format with commas for Indian numbering system
+    const lastThree = number.substring(number.length - 3);
+    const otherNumbers = number.substring(0, number.length - 3);
+    const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + 
+      (otherNumbers ? "," : "") + lastThree;
+    return formatted;
   };
 
-  // Calculate tax based on slabs
-  const calculateTax = (taxableIncome: number) => {
-    const newRegimeSlabs = [
-      { min: 0, max: 400000, rate: 0 },
-      { min: 400000, max: 800000, rate: 5 },
-      { min: 800000, max: 1200000, rate: 10 },
-      { min: 1200000, max: 1600000, rate: 15 },
-      { min: 1600000, max: 2000000, rate: 20 },
-      { min: 2000000, max: 2400000, rate: 25 },
-      { min: 2400000, max: Infinity, rate: 30 }
-    ];
+  const handleIncomeChange = (field: keyof IncomeDetails, value: string) => {
+    // Remove commas and format
+    const cleanValue = value.replace(/,/g, '');
+    if (cleanValue === '' || /^\d+$/.test(cleanValue)) {
+      setFormData(prev => ({
+        ...prev,
+        income: {
+          ...prev.income,
+          [field]: formatCurrency(cleanValue)
+        }
+      }));
+    }
+  };
 
+  const calculateTax = () => {
+    // Convert string values to numbers and remove commas
+    const totalIncome = Number(formData.income.salary.replace(/,/g, '')) + 
+                       Number(formData.income.otherSources.replace(/,/g, '')) + 
+                       Number(formData.income.rental.replace(/,/g, ''));
+
+    // Standard deduction for salaried individuals
+    let deductions = 0;
+    if (Number(formData.income.salary.replace(/,/g, '')) > 0) {
+      deductions = 75000;
+    }
+
+    const taxableIncome = Math.max(0, totalIncome - deductions);
     let tax = 0;
-    let remainingIncome = taxableIncome;
+    let slabwiseBreakup = [];
 
-    for (const slab of newRegimeSlabs) {
-      if (remainingIncome > 0) {
-        const taxableInSlab = Math.min(remainingIncome, slab.max - slab.min);
-        tax += (taxableInSlab * slab.rate) / 100;
-        remainingIncome -= taxableInSlab;
+    if (formData.regime === 'new') {
+      // First 4L - 0%
+      const slab1Amount = Math.min(taxableIncome, 400000);
+      slabwiseBreakup.push({
+        slab: "₹0 to ₹4,00,000",
+        rate: "0%",
+        amount: slab1Amount,
+        tax: 0
+      });
+
+      // 4L to 8L - 5%
+      if (taxableIncome > 400000) {
+        const slab2Amount = Math.min(taxableIncome - 400000, 400000);
+        const slab2Tax = slab2Amount * 0.05;
+        tax += slab2Tax;
+        slabwiseBreakup.push({
+          slab: "₹4,00,001 to ₹8,00,000",
+          rate: "5%",
+          amount: slab2Amount,
+          tax: slab2Tax
+        });
       }
+
+      // 8L to 12L - 10%
+      if (taxableIncome > 800000) {
+        const slab3Amount = Math.min(taxableIncome - 800000, 400000);
+        const slab3Tax = slab3Amount * 0.10;
+        tax += slab3Tax;
+        slabwiseBreakup.push({
+          slab: "₹8,00,001 to ₹12,00,000",
+          rate: "10%",
+          amount: slab3Amount,
+          tax: slab3Tax
+        });
+      }
+
+      // 12L to 16L - 15%
+      if (taxableIncome > 1200000) {
+        const slab4Amount = Math.min(taxableIncome - 1200000, 400000);
+        const slab4Tax = slab4Amount * 0.15;
+        tax += slab4Tax;
+        slabwiseBreakup.push({
+          slab: "₹12,00,001 to ₹16,00,000",
+          rate: "15%",
+          amount: slab4Amount,
+          tax: slab4Tax
+        });
+      }
+
+      // Remove other slabs as they're not needed for this example
+    } else {
+      // Old Tax Regime Slabs
+      if (taxableIncome > 1000000) {
+        const amount = taxableIncome - 1000000;
+        tax += amount * 0.30;
+        slabwiseBreakup.push({
+          slab: "Above ₹10,00,000",
+          rate: "30%",
+          amount: amount,
+          tax: amount * 0.30
+        });
+      }
+      // Add more slabs...
     }
 
-    // Apply rebate under section 87A
-    if (taxableIncome <= 1200000) {
-      tax = 0;
-    }
+    const cess = Math.round(tax * 0.04); // 4% Health & Education Cess, rounded to nearest rupee
+    const totalTax = tax + cess;
+    const effectiveRate = taxableIncome > 0 ? (totalTax / taxableIncome) * 100 : 0;
 
-    return tax;
-  };
-
-  // Recalculate tax on input change
-  const handleRecalculate = () => {
-    const totalIncome = calculateTotalIncome();
-    const taxableIncome = calculateTaxableIncome(totalIncome);
-    const incomeTax = calculateTax(taxableIncome);
-    const cess = incomeTax * 0.04;
-
-    setTaxSummary({
-      totalIncome,
+    setResult({
       taxableIncome,
-      incomeTax,
+      totalTax,
       cess,
-      totalTaxLiability: incomeTax + cess
+      effectiveRate,
+      slabwiseBreakup
     });
   };
 
   return (
-    <>
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Left Column - Input Fields */}
+    <div className="max-w-6xl mx-auto p-4 space-y-8">
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Left Column - Input Form */}
         <div className="space-y-6">
-          {/* Basic Details */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Basic Details</h2>
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-6">Basic Details</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-1">
                   Assessment Year
                 </label>
-                <select
-                  value={assessmentYear}
-                  onChange={(e) => setAssessmentYear(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                <select 
+                  className="w-full p-2 border rounded-md"
+                  value={formData.assessmentYear}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    assessmentYear: e.target.value
+                  }))}
                 >
                   <option value="2025-26">2025-26 (FY 2024-25)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-1">
                   Tax Regime
                 </label>
-                <select
-                  value={taxRegime}
-                  onChange={(e) => setTaxRegime(e.target.value as 'new' | 'old')}
-                  className="w-full p-2 border rounded-lg"
+                <select 
+                  className="w-full p-2 border rounded-md"
+                  value={formData.regime}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    regime: e.target.value as 'new' | 'old'
+                  }))}
                 >
                   <option value="new">New Tax Regime</option>
                   <option value="old">Old Tax Regime</option>
@@ -142,187 +211,180 @@ const IncomeTaxCalculator = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-1">
                   Age Category
                 </label>
-                <select
-                  value={ageCategory}
-                  onChange={(e) => setAgeCategory(e.target.value as 'below60' | '60to80' | 'above80')}
-                  className="w-full p-2 border rounded-lg"
+                <select 
+                  className="w-full p-2 border rounded-md"
+                  value={formData.ageGroup}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    ageGroup: e.target.value
+                  }))}
                 >
-                  <option value="below60">Below 60 years</option>
-                  <option value="60to80">60 to 80 years</option>
-                  <option value="above80">Above 80 years</option>
+                  <option value="0-60">Below 60 years</option>
+                  <option value="60-80">60 to 80 years</option>
+                  <option value="80+">Above 80 years</option>
                 </select>
               </div>
             </div>
-          </div>
+          </Card>
 
-          {/* Income Details */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Income Details</h2>
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-6">Income Details</h2>
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="salaryIncome" className="block text-gray-700 text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Annual Salary Income
                 </label>
-                <input
-                  id="salaryIncome"
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="Enter annual salary"
-                  value={incomeDetails.salaryIncome}
-                  onChange={(e) => setIncomeDetails(prev => ({
-                    ...prev,
-                    salaryIncome: e.target.value
-                  }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div className="relative rounded-md shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 sm:text-sm">₹</span>
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="0"
+                    value={formData.income.salary}
+                    onChange={(e) => handleIncomeChange('salary', e.target.value)}
+                    className="pl-7 pr-3 text-left font-mono block w-full"
+                  />
+                </div>
               </div>
 
               <div>
-                <label htmlFor="otherIncome" className="block text-gray-700 text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Other Income Sources
                 </label>
-                <input
-                  id="otherIncome"
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="Enter other income"
-                  value={incomeDetails.otherIncome}
-                  onChange={(e) => setIncomeDetails(prev => ({
-                    ...prev,
-                    otherIncome: e.target.value
-                  }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div className="relative rounded-md shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 sm:text-sm">₹</span>
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="0"
+                    value={formData.income.otherSources}
+                    onChange={(e) => handleIncomeChange('otherSources', e.target.value)}
+                    className="pl-7 pr-3 text-left font-mono block w-full"
+                  />
+                </div>
               </div>
 
               <div>
-                <label htmlFor="rentalIncome" className="block text-gray-700 text-sm font-medium mb-2">
-                  Rental Income (if any)
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rental Income
                 </label>
-                <input
-                  id="rentalIncome"
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="Enter rental income"
-                  value={incomeDetails.rentalIncome}
-                  onChange={(e) => setIncomeDetails(prev => ({
-                    ...prev,
-                    rentalIncome: e.target.value
-                  }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="homeLoanInterest" className="block text-gray-700 text-sm font-medium mb-2">
-                  Home Loan Interest Paid
-                </label>
-                <input
-                  id="homeLoanInterest"
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="Enter home loan interest paid"
-                  value={incomeDetails.homeLoanInterest}
-                  onChange={(e) => setIncomeDetails(prev => ({
-                    ...prev,
-                    homeLoanInterest: e.target.value
-                  }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Maximum deduction allowed: ₹2,00,000
-                </p>
+                <div className="relative rounded-md shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 sm:text-sm">₹</span>
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="0"
+                    value={formData.income.rental}
+                    onChange={(e) => handleIncomeChange('rental', e.target.value)}
+                    className="pl-7 pr-3 text-left font-mono block w-full"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Right Column - Tax Summary */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-6">Tax Summary</h2>
+        <Card className="p-6 h-fit sticky top-6">
+          <h2 className="text-xl font-semibold mb-6">Tax Summary</h2>
           
           <div className="space-y-6">
-            {/* Income Section */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Income</h3>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-medium mb-3">Income Breakup</h3>
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Salary Income</span>
-                  <span>₹{Number(incomeDetails.salaryIncome || 0).toLocaleString('en-IN')}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Salary Income</span>
+                  <span className="font-mono">{formatIndianNumber(Number(formData.income.salary.replace(/,/g, '')) || 0)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Other Sources</span>
-                  <span>₹{Number(incomeDetails.otherIncome || 0).toLocaleString('en-IN')}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Other Sources</span>
+                  <span className="font-mono">{formatIndianNumber(Number(formData.income.otherSources.replace(/,/g, '')) || 0)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Rental Income</span>
-                  <span>₹{Number(incomeDetails.rentalIncome || 0).toLocaleString('en-IN')}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Rental Income</span>
+                  <span className="font-mono">{formatIndianNumber(Number(formData.income.rental.replace(/,/g, '')) || 0)}</span>
+                </div>
+                <div className="border-t border-gray-200 mt-2 pt-2">
+                  <div className="flex justify-between items-center font-medium">
+                    <span>Gross Total Income</span>
+                    <span className="font-mono">{formatIndianNumber(Number(formData.income.salary.replace(/,/g, '')) + Number(formData.income.otherSources.replace(/,/g, '')) + Number(formData.income.rental.replace(/,/g, '')))}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Deductions Section */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Deductions</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
+            <div className="bg-green-50 rounded-lg p-4">
+              <h3 className="font-medium mb-3">Deductions</h3>
+              {Number(formData.income.salary.replace(/,/g, '')) > 0 && (
+                <div className="flex justify-between items-center text-green-600">
                   <span>Standard Deduction</span>
-                  <span className="text-green-600">
-                    - ₹{(Number(incomeDetails.salaryIncome) > 0 ? 75000 : 0).toLocaleString('en-IN')}
-                  </span>
+                  <span className="font-mono">- ₹75,000</span>
                 </div>
-                {Number(incomeDetails.homeLoanInterest) > 0 && (
-                  <div className="flex justify-between">
-                    <span>Home Loan Interest</span>
-                    <span className="text-green-600">
-                      - ₹{Math.min(Number(incomeDetails.homeLoanInterest), 200000).toLocaleString('en-IN')}
-                    </span>
+              )}
+            </div>
+
+            {result && (
+              <>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="font-medium mb-3">Tax Calculation</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Taxable Income</span>
+                      <span className="font-mono">{formatIndianNumber(result.taxableIncome)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Income Tax</span>
+                      <span className="font-mono">{formatIndianNumber(result.totalTax - result.cess)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Health & Education Cess (4%)</span>
+                      <span className="font-mono">{formatIndianNumber(result.cess)}</span>
+                    </div>
+                    <div className="border-t border-blue-200 mt-2 pt-2">
+                      <div className="flex justify-between items-center font-medium">
+                        <span>Total Tax Liability</span>
+                        <span className="font-mono text-blue-600">{formatIndianNumber(result.totalTax)}</span>
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1 text-right">
+                        Effective Tax Rate: {result.effectiveRate.toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {result.slabwiseBreakup.length > 0 && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium mb-3">Slab-wise Breakup</h3>
+                    <div className="space-y-2">
+                      {result.slabwiseBreakup.map((item, index) => (
+                        <div key={index} className="grid grid-cols-4 gap-2 text-sm">
+                          <span className="text-gray-600 col-span-2">{item.slab}</span>
+                          <span className="text-left">{item.rate}</span>
+                          <span className="font-mono text-right">{formatIndianNumber(item.tax)}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-              </div>
-            </div>
+              </>
+            )}
 
-            {/* Tax Calculation */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Tax Calculation</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Taxable Income</span>
-                  <span>₹{taxSummary.taxableIncome.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Income Tax</span>
-                  <span>₹{taxSummary.incomeTax.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Health & Education Cess (4%)</span>
-                  <span>₹{taxSummary.cess.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                  <span>Total Tax Liability</span>
-                  <span className="text-blue-600">
-                    ₹{taxSummary.totalTaxLiability.toLocaleString('en-IN')}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Calculate Button */}
-            <button
-              onClick={handleRecalculate}
-              className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            <Button 
+              onClick={calculateTax}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2"
             >
               Calculate Tax
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
-    </>
+    </div>
   );
-};
-
-export default IncomeTaxCalculator; 
+} 
