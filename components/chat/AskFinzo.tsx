@@ -68,77 +68,79 @@ export default function AskFinzo() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-[800px] mx-auto px-4 py-8">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold text-purple-600 mb-3">Ask Finzo</h1>
-        <p className="text-xl text-gray-600">Your Financial Guide</p>
+        <h1 className="text-3xl font-semibold text-[#8257E6] mb-2">Ask Finzo</h1>
+        <p className="text-gray-600">Your Financial Guide</p>
       </div>
 
-      <div className="mb-8 space-y-4 h-[400px] overflow-y-auto p-4 rounded-xl bg-gray-50">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            <div
-              className={`max-w-[80%] rounded-xl p-4 ${
-                message.role === 'user'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white border border-gray-200'
-              }`}
-            >
-              {message.content}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              Thinking...
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {PROMPTS.map((prompt, index) => (
           <button
             key={index}
             onClick={() => handlePromptClick(prompt)}
-            className="text-left p-6 rounded-xl bg-white shadow-sm hover:shadow-md 
-                     border border-gray-100 hover:border-purple-300 transition-all duration-200
-                     group cursor-pointer"
+            className="w-full text-left p-4 rounded-lg bg-white hover:bg-gray-50 
+                     transition-all duration-200 cursor-pointer"
           >
-            <h3 className="text-lg font-medium text-gray-800 group-hover:text-purple-600 
-                         transition-colors duration-200">
+            <p className="text-gray-800 text-base mb-1">
               {prompt.question}
-            </h3>
-            <span className="inline-block mt-2 text-sm text-purple-600 font-medium">
+            </p>
+            <span className="text-[#8257E6] text-sm">
               {prompt.category}
             </span>
           </button>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-4">
+      <form onSubmit={handleSubmit} className="relative">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask me anything about Indian finance..."
-          className="flex-1 p-4 rounded-xl border border-gray-200 focus:ring-2 
-                   focus:ring-purple-500 focus:border-transparent"
+          className="w-full p-4 pr-24 rounded-lg border border-gray-200 
+                   focus:outline-none focus:border-[#8257E6]"
         />
         <button
           type="submit"
-          className="px-8 py-4 bg-purple-600 text-white rounded-xl 
-                   hover:bg-purple-700 transition-colors"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2
+                   px-6 py-2 bg-[#8257E6] text-white rounded-lg
+                   hover:bg-[#7048d5] transition-colors"
+          disabled={isLoading}
         >
           Send
         </button>
       </form>
+
+      {messages.length > 0 && (
+        <div className="mt-8 space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              <div
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.role === 'user'
+                    ? 'bg-[#8257E6] text-white'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {message.content}
+              </div>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 rounded-lg p-3">
+                Thinking...
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -164,12 +164,12 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFAFF] py-12 px-4">
+    <div className="min-h-screen bg-[#FDFAFF] py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-7xl font-bold text-purple-600 mb-4">Ask Finzo</h1>
-          <p className="text-2xl text-gray-600">Your Financial Guide</p>
+        <div className="text-center mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-purple-600 mb-3">Ask Finzo</h1>
+          <p className="text-xl text-gray-600">Your Financial Guide</p>
         </div>
 
         {/* Chat Container */}
