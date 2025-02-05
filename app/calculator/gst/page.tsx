@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Head from 'next/head'
@@ -50,10 +50,13 @@ export default function GSTCalculatorPage() {
     amount: 0,
     rate: 18,
     isInclusive: false,
-    isInterState: false // New: Toggle between CGST/SGST and IGST
+    isInterState: false
   });
 
-  const [result, setResult] = useState<GSTResult | null>(null);
+  // Calculate result whenever input changes
+  const result = useMemo(() => {
+    return calculateGST(gstInput.amount, gstInput.rate, gstInput.isInclusive);
+  }, [gstInput.amount, gstInput.rate, gstInput.isInclusive]);
 
   // Add state for FAQ accordion
   const [openFaq, setOpenFaq] = useState('');
@@ -117,12 +120,17 @@ export default function GSTCalculatorPage() {
               <div>
                 <label className="block text-gray-700 mb-2">Amount (₹)</label>
                 <input
-                  type="number"
-                  value={gstInput.amount}
-                  onChange={(e) => setGstInput({
-                    ...gstInput,
-                    amount: Number(e.target.value)
-                  })}
+                  type="text"
+                  value={gstInput.amount || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      setGstInput({
+                        ...gstInput,
+                        amount: Number(value) || 0
+                      });
+                    }
+                  }}
                   className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                   placeholder="Enter amount"
                 />
@@ -185,33 +193,32 @@ export default function GSTCalculatorPage() {
           >
             <h2 className="text-2xl font-bold mb-6">Tax Breakdown</h2>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center py-3 border-b border-gray-200">
                 <span className="text-gray-600">Base Amount</span>
-                <span className="font-semibold">₹{result?.baseAmount}</span>
+                <span className="font-semibold">₹ {result.baseAmount.toLocaleString('en-IN')}</span>
               </div>
               
               {gstInput.isInterState ? (
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center py-3 border-b border-gray-200">
                   <span className="text-gray-600">IGST ({gstInput.rate}%)</span>
-                  <span className="text-green-600">₹{result?.igst}</span>
+                  <span className="text-green-600 font-semibold">₹ {result.igst.toLocaleString('en-IN')}</span>
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center py-3 border-b border-gray-200">
                     <span className="text-gray-600">CGST ({gstInput.rate/2}%)</span>
-                    <span className="text-green-600">₹{result?.cgst}</span>
+                    <span className="text-green-600 font-semibold">₹ {result.cgst.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center py-3 border-b border-gray-200">
                     <span className="text-gray-600">SGST ({gstInput.rate/2}%)</span>
-                    <span className="text-green-600">₹{result?.sgst}</span>
+                    <span className="text-green-600 font-semibold">₹ {result.sgst.toLocaleString('en-IN')}</span>
                   </div>
                 </>
               )}
 
-              <div className="h-px bg-gray-200 my-2"></div>
-              <div className="flex justify-between items-center text-lg font-bold">
-                <span>Total Amount</span>
-                <span className="text-purple-600">₹{result?.totalAmount}</span>
+              <div className="flex justify-between items-center pt-3">
+                <span className="font-bold">Total Amount</span>
+                <span className="font-bold text-lg text-purple-600">₹ {result.totalAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </motion.div>

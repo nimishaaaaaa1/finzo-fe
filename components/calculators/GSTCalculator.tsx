@@ -2,14 +2,16 @@ import { useState, useMemo } from 'react'
 import { Calculator } from 'lucide-react'
 
 export default function GSTCalculator() {
-  const [amount, setAmount] = useState<number>(0)
+  const [amount, setAmount] = useState<string>('')
   const [rate, setRate] = useState<number>(18)
   const [isInclusive, setIsInclusive] = useState<boolean>(false)
   const [isInterState, setIsInterState] = useState<boolean>(false)
 
   // Calculate tax breakdown in real-time
   const breakdown = useMemo(() => {
-    if (!amount) {
+    const numAmount = parseFloat(amount) || 0
+
+    if (!numAmount) {
       return {
         baseAmount: 0,
         cgst: 0,
@@ -24,12 +26,12 @@ export default function GSTCalculator() {
 
     if (isInclusive) {
       // If amount includes GST, calculate backwards
-      baseAmount = amount / (1 + (rate / 100))
-      totalTax = amount - baseAmount
+      baseAmount = numAmount / (1 + (rate / 100))
+      totalTax = numAmount - baseAmount
     } else {
       // If amount excludes GST
-      baseAmount = amount
-      totalTax = amount * (rate / 100)
+      baseAmount = numAmount
+      totalTax = numAmount * (rate / 100)
     }
 
     // Split tax into CGST/SGST or IGST based on transaction type
@@ -39,11 +41,11 @@ export default function GSTCalculator() {
     const totalAmount = baseAmount + totalTax
 
     return {
-      baseAmount,
-      cgst,
-      sgst,
-      igst,
-      totalAmount
+      baseAmount: Number(baseAmount.toFixed(2)),
+      cgst: Number(cgst.toFixed(2)),
+      sgst: Number(sgst.toFixed(2)),
+      igst: Number(igst.toFixed(2)),
+      totalAmount: Number(totalAmount.toFixed(2))
     }
   }, [amount, rate, isInclusive, isInterState])
 
@@ -63,9 +65,14 @@ export default function GSTCalculator() {
                 Amount (₹)
               </label>
               <input
-                type="number"
-                value={amount || ''}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                type="text"
+                value={amount}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setAmount(value)
+                  }
+                }}
                 className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter amount"
               />
@@ -117,30 +124,30 @@ export default function GSTCalculator() {
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-blue-100">
                 <span className="text-gray-600">Base Amount</span>
-                <span className="font-medium">₹{breakdown.baseAmount.toFixed(2)}</span>
+                <span className="font-medium">₹ {breakdown.baseAmount.toLocaleString('en-IN')}</span>
               </div>
 
               {isInterState ? (
                 <div className="flex justify-between items-center py-3 border-b border-blue-100">
                   <span className="text-gray-600">IGST ({rate}%)</span>
-                  <span className="font-medium">₹{breakdown.igst.toFixed(2)}</span>
+                  <span className="font-medium text-green-600">₹ {breakdown.igst.toLocaleString('en-IN')}</span>
                 </div>
               ) : (
                 <>
                   <div className="flex justify-between items-center py-3 border-b border-blue-100">
                     <span className="text-gray-600">CGST ({rate/2}%)</span>
-                    <span className="font-medium">₹{breakdown.cgst.toFixed(2)}</span>
+                    <span className="font-medium text-green-600">₹ {breakdown.cgst.toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-blue-100">
                     <span className="text-gray-600">SGST ({rate/2}%)</span>
-                    <span className="font-medium">₹{breakdown.sgst.toFixed(2)}</span>
+                    <span className="font-medium text-green-600">₹ {breakdown.sgst.toLocaleString('en-IN')}</span>
                   </div>
                 </>
               )}
 
               <div className="flex justify-between items-center pt-3">
                 <span className="font-semibold">Total Amount</span>
-                <span className="font-semibold text-lg">₹{breakdown.totalAmount.toFixed(2)}</span>
+                <span className="font-semibold text-lg text-purple-600">₹ {breakdown.totalAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
