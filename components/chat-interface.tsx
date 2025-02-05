@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -27,178 +27,257 @@ const oldRegimeSlabs: TaxSlab[] = [
   { min: 1000001, max: Infinity, rate: 0.30 }
 ];
 
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+const SAMPLE_PROMPTS = [
+  {
+    question: "Explain the difference between the old and new tax regime",
+    category: "Taxation"
+  },
+  {
+    question: "Suggest good investments for a Balanced investor",
+    category: "Investment"
+  },
+  {
+    question: "I have an SIP of Rs 5000 per month but I also invest in stocks",
+    category: "Portfolio"
+  },
+  {
+    question: "Which small-cap mutual funds are best for me to invest in 2024?",
+    category: "Mutual Funds"
+  }
+]
+
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: `Hi! I'm Finzo, your AI financial guide. I can help you with:
-
-• Tax calculations and planning
-• Investment advice and strategies
-• Budgeting and savings tips
-• Latest financial updates
-
-What would you like to know about?`
-    }
-  ])
-
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [hasStartedChat, setHasStartedChat] = useState(false)
+  const [streamingMessage, setStreamingMessage] = useState('')
+
+  // Auto-scroll chat container when new content arrives
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      const container = chatContainerRef.current
+      container.scrollTop = container.scrollHeight
+    }
+  }, [messages, streamingMessage])
+
+  const handleStream = async (response: Response) => {
+    if (!response.body) return
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let streamedContent = ''
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        streamedContent += chunk
+        setStreamingMessage(streamedContent)
+      }
+    } finally {
+      reader.releaseLock()
+      setMessages(prev => [...prev, { role: 'assistant', content: streamedContent }])
+      setStreamingMessage('')
+      setIsLoading(false)
+    }
+  }
+
+  const handlePromptClick = async (prompt: string) => {
+    if (isLoading) return
+    setHasStartedChat(true)
+    setStreamingMessage('')
+    
+    // Immediately add user message
+    setMessages(prev => [...prev, { role: 'user', content: prompt }])
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, { role: 'user', content: prompt }]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get response')
+      }
+
+      await handleStream(response)
+    } catch (error) {
+      console.error('Chat error:', error)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.'
+      }])
+      setIsLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || isLoading) return
+    setHasStartedChat(true)
+    setStreamingMessage('')
 
     const userMessage = input.trim()
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
 
-    let response = ''
-    const lowerCaseInput = userMessage.toLowerCase()
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, { role: 'user', content: userMessage }]
+        })
+      })
 
-    if (lowerCaseInput.includes('which regime') || lowerCaseInput.includes('better')) {
-      response = `Let me help you choose the best tax regime for FY 2025-26:
+      if (!response.ok) {
+        throw new Error('Failed to get response')
+      }
 
-NEW REGIME benefits:
-✓ No tax up to ₹12L (₹12.75L for salaried)
-✓ Higher standard deduction (₹75,000)
-✓ Lower tax rates overall
-✗ No additional deductions available
-
-OLD REGIME benefits:
-✓ Standard deduction: ₹50,000 (unchanged)
-✓ Comprehensive deductions:
-  • Section 80C: ₹1.5L
-  • Section 80D: Health Insurance
-  • HRA Benefits
-  • Home Loan Benefits
-  • NPS Benefits
-
-The old regime might be better if you:
-• Have high HRA claims
-• Maximize 80C investments
-• Pay home loan EMIs
-• Have medical insurance
-
-Would you like me to calculate your tax under both regimes?`
-    } 
-    else if (lowerCaseInput.includes('old regime')) {
-      response = `Old Tax Regime for FY 2025-26:
-
-Tax Slabs:
-• Up to ₹2.5L → 0%
-• ₹2.5L to ₹5L → 5%
-• ₹5L to ₹10L → 20%
-• Above ₹10L → 30%
-
-Key Features:
-✓ Standard Deduction: ₹50,000
-✓ Section 80C: Up to ₹1.5L
-✓ Section 80D: Health Insurance
-✓ HRA and other exemptions available
-✓ Rebate u/s 87A up to ₹5L income
-
-Would you like to calculate your tax liability?`
+      await handleStream(response)
+    } catch (error) {
+      console.error('Chat error:', error)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.'
+      }])
+      setIsLoading(false)
     }
-    else if (lowerCaseInput.includes('new regime')) {
-      response = `New Tax Regime for FY 2025-26:
-
-Tax Slabs:
-• Up to ₹12L → 0%
-• ₹12L to ₹15L → 10%
-• ₹15L to ₹20L → 15%
-• ₹20L to ₹30L → 20%
-• Above ₹30L → 30%
-
-Key Benefits:
-✓ Higher Standard Deduction: ₹75,000
-✓ No tax up to ₹12.75L for salaried
-✓ Simplified tax structure
-✓ Lower tax rates
-
-Shall I help you calculate your tax?`
-    }
-    else if (lowerCaseInput.includes('deduction')) {
-      response = `Standard Deduction & Benefits (FY 2025-26):
-
-NEW REGIME:
-✓ ₹75,000 standard deduction for salaried/pensioners
-✓ Makes income up to ₹12.75L tax-free
-✗ No additional deductions available
-
-OLD REGIME:
-✓ ₹50,000 standard deduction (unchanged)
-✓ Major deductions available:
-  • Section 80C: Up to ₹1.5L
-    - PPF, ELSS, EPF, Life Insurance
-    - Home Loan Principal, Tuition Fees
-  • Section 80D: Health Insurance
-    - Self & Family: Up to ₹25,000
-    - Parents: Up to ₹50,000
-  • HRA Benefits
-  • Home Loan Interest: Up to ₹2L
-  • NPS: Additional ₹50,000 u/s 80CCD(1B)
-
-Would you like me to calculate your tax savings with these deductions?`
-    }
-
-    setMessages(prev => [...prev, { role: 'assistant', content: response }])
-    setIsLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 py-24">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-purple-600 mb-4">Ask Finzo</h1>
-          <p className="text-xl text-gray-600">Your Financial Guide</p>
+    <div className="min-h-screen bg-[#FDFAFF] py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-7xl font-bold text-purple-600 mb-4">Ask Finzo</h1>
+          <p className="text-2xl text-gray-600">Your Financial Guide</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-2">Explain the difference between the old and new tax regime</h3>
-            <p className="text-purple-600">Taxation</p>
+        {/* Chat Container */}
+        <div className="bg-white rounded-3xl shadow-lg flex flex-col h-[700px]">
+          {/* Messages Area with proper scrolling */}
+          <div 
+            ref={chatContainerRef}
+            className="flex-1 p-6 overflow-y-auto custom-scrollbar scroll-smooth"
+          >
+            {!hasStartedChat ? (
+              <div className="h-full flex flex-col items-center justify-center">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+                  How can I help you today?
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
+                  {SAMPLE_PROMPTS.map((prompt, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handlePromptClick(prompt.question)}
+                      disabled={isLoading}
+                      className="bg-white p-6 rounded-2xl text-left transition-all hover:bg-gray-50 border-2 border-gray-100 hover:border-purple-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 group-hover:text-purple-700">
+                        {prompt.question}
+                      </h3>
+                      <p className="text-purple-600 font-medium text-sm">
+                        {prompt.category}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <AnimatePresence initial={false}>
+                  {messages.map((message, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-3xl px-6 py-4 ${
+                          message.role === 'user'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap text-lg">{message.content}</div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {streamingMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div className="max-w-[80%] rounded-3xl px-6 py-4 bg-gray-100 text-gray-900">
+                        <div className="whitespace-pre-wrap text-lg">{streamingMessage}</div>
+                      </div>
+                    </motion.div>
+                  )}
+                  {isLoading && !streamingMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div className="bg-gray-100 rounded-3xl px-6 py-4">
+                        <div className="flex space-x-2">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
-          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-2">Suggest good investments for a Balanced investor</h3>
-            <p className="text-purple-600">Investment</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-2">I have an SIP of Rs 5000 per month but I also invest in stocks</h3>
-            <p className="text-purple-600">Portfolio</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-lg font-semibold mb-2">Which small-cap mutual funds are best for me to invest in 2024?</h3>
-            <p className="text-purple-600">Mutual Funds</p>
-          </div>
-        </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <form onSubmit={handleSubmit} className="flex gap-4">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything about Indian finance..."
-              className="flex-1 rounded-lg border p-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-            <Button 
-              type="submit"
-              disabled={isLoading}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8"
-            >
-              Send
-            </Button>
-          </form>
+          {/* Input Form */}
+          <div className="p-6 border-t bg-white">
+            <form onSubmit={handleSubmit} className="relative flex items-center">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask me anything about Indian finance..."
+                className="w-full pr-32 p-6 rounded-3xl border-2 border-gray-200 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800 placeholder-gray-400"
+                disabled={isLoading}
+              />
+              <button 
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="absolute right-2 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-2xl font-medium text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Send
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   )
-}
-
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
 }
 

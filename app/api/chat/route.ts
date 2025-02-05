@@ -151,8 +151,8 @@ export async function POST(req: Request) {
       )
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
       messages: [
         {
           role: "system",
@@ -163,19 +163,42 @@ export async function POST(req: Request) {
           content: msg.content
         }))
       ],
-      temperature: 0.6,
-      max_tokens: 1000,
-      presence_penalty: 0.1,
-      frequency_penalty: 0.1,
-      top_p: 0.9,
+      temperature: 0.7,
+      stream: true,
     })
 
-    if (!completion.choices[0]?.message) {
-      throw new Error('No response from OpenAI')
-    }
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        const queue = []
+        let currentMessage = ''
 
-    return NextResponse.json({ 
-      result: completion.choices[0].message
+        try {
+          for await (const chunk of response) {
+            const content = chunk.choices[0]?.delta?.content || ''
+            if (content) {
+              currentMessage += content
+              queue.push(encoder.encode(content))
+              while (queue.length > 0) {
+                controller.enqueue(queue.shift())
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Streaming error:', error)
+          controller.error(error)
+        } finally {
+          controller.close()
+        }
+      }
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     })
 
   } catch (error: any) {
