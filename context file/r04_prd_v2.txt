@@ -1,0 +1,716 @@
+# FINZO API - PRODUCT REQUIREMENTS DOCUMENT V2
+
+## 1. EXECUTIVE SUMMARY
+
+Finzo aims to be a comprehensive financial management platform combining personal finance capabilities (like Splitwise) with enterprise-grade expense management (like Concur). The API described in this document will serve as the foundation for both consumer (B2C) and business (B2B) applications, enabling seamless financial management, expense tracking, tax optimization, and multi-tenant operations.
+
+### 1.1 Key Differentiators
+- **Unified Platform**: Seamless transition between personal and business finance
+- **AI-Powered Insights**: Automated categorization, tax optimization, and anomaly detection
+- **Multi-Tenant Architecture**: Support for individuals, businesses, and enterprise clients
+- **India-Specific Compliance**: Built-in GST, income tax, and regulatory compliance
+- **Extensible Ecosystem**: Open API for third-party integrations and custom solutions
+
+### 1.2 Target Market Segments
+- **Individual Users**: Salaried professionals, freelancers, young investors
+- **Small Businesses**: Proprietorships, partnerships, small LLPs
+- **Medium Enterprises**: Companies with 50-200 employees
+- **Accounting Firms**: Managing multiple client accounts
+
+## 2. USER PERSONAS & JOURNEYS
+
+### 2.1 Individual User Personas
+
+#### 2.1.1 Salaried Professional (Priya, 32)
+- **Goals**: Optimize taxes, track shared expenses, plan investments
+- **Pain Points**: Manual expense tracking, complex tax rules, limited financial insights
+- **Technical Proficiency**: Moderate, uses multiple financial apps
+- **Key Features**: Tax optimization, bill splitting, investment tracking
+
+#### 2.1.2 Freelancer (Rahul, 28)
+- **Goals**: Track variable income, manage GST, separate business/personal expenses
+- **Pain Points**: Invoice management, GST compliance, income forecasting
+- **Technical Proficiency**: High, early adopter of digital tools
+- **Key Features**: GST filing, income categorization, client management
+
+#### 2.1.3 Young Investor (Aisha, 25)
+- **Goals**: Build financial literacy, start investments, budget effectively
+- **Pain Points**: Information overload, uncertainty about financial decisions
+- **Technical Proficiency**: High, mobile-first user
+- **Key Features**: Financial education, goal-based savings, spending insights
+
+### 2.2 Business User Personas
+
+#### 2.2.1 Small Business Owner (Vikram, 40)
+- **Goals**: GST compliance, expense management, financial reporting
+- **Pain Points**: Limited resources, manual processes, compliance burden
+- **Technical Proficiency**: Low to moderate, relies on accountant
+- **Key Features**: GST filing, invoice management, basic reporting
+
+#### 2.2.2 Finance Manager (Neha, 35)
+- **Goals**: Streamlined operations, accurate reporting, cost control
+- **Pain Points**: Multiple systems, data reconciliation, approval workflows
+- **Technical Proficiency**: Moderate, experienced with financial software
+- **Key Features**: Approval workflows, custom reporting, policy enforcement
+
+#### 2.2.3 Accountant (Suresh, 45)
+- **Goals**: Accurate bookkeeping, compliance, client management
+- **Pain Points**: Data collection from clients, repetitive tasks, deadline pressure
+- **Technical Proficiency**: Moderate, familiar with accounting software
+- **Key Features**: Multi-client management, tax preparation, audit support
+
+### 2.3 Critical User Journeys
+
+#### 2.3.1 Individual User: Monthly Expense Management
+1. **Data Capture**: User captures expenses via receipt scan, bank import, or manual entry
+2. **Categorization**: System automatically categorizes transactions with AI
+3. **Splitting**: User splits relevant expenses with roommates/friends
+4. **Insights**: User reviews spending patterns and budget adherence
+5. **Tax Impact**: System highlights tax-deductible expenses and optimization opportunities
+6. **Planning**: User adjusts budget and savings goals based on insights
+
+#### 2.3.2 Business User: Expense Approval Workflow
+1. **Submission**: Employee submits expense with receipt via mobile app
+2. **Validation**: System validates against expense policy and flags violations
+3. **Approval**: Manager reviews and approves/rejects with comments
+4. **Processing**: Finance team processes for payment/reimbursement
+5. **Accounting**: Expense is categorized and recorded in financial system
+6. **Reporting**: Expense data flows into financial and compliance reports
+
+#### 2.3.3 Cross-Segment Journey: Tax Filing Preparation
+1. **Year-Round Tracking**: System tracks tax-relevant transactions throughout the year
+2. **Document Collection**: User uploads/system captures tax documents
+3. **Preliminary Calculation**: System estimates tax liability with multiple scenarios
+4. **Optimization**: System suggests tax-saving opportunities
+5. **Form Preparation**: System prepares required tax forms
+6. **Filing**: User reviews and submits filing or shares with accountant
+
+## 3. CORE FUNCTIONALITY
+
+### 3.1 Authentication & User Management
+
+#### 3.1.1 Authentication Methods
+- Email/password with strong password requirements
+- Mobile number with OTP verification
+- Social login (Google, Apple) with security enhancements
+- Multi-factor authentication options
+- Biometric authentication on supported devices
+
+#### 3.1.2 User Management
+- Self-service registration and profile management
+- Role-based access control with custom permission sets
+- User hierarchy for approval workflows
+- Team management with bulk operations
+- User activity audit trail
+
+#### 3.1.3 Multi-Tenant Architecture
+- Logical separation of data between tenants
+- Cross-tenant operation capabilities for accountants/admins
+- Tenant-specific configurations and customizations
+- White-labeling options for enterprise clients
+- Tenant hierarchy for complex organizations
+
+### 3.2 Financial Data Management
+
+#### 3.2.1 Transaction Management
+- Manual transaction entry with smart defaults
+- Bulk import from bank statements (CSV, PDF, direct API)
+- Recurring transaction setup and management
+- Split transaction handling with settlement tracking
+- Transaction attachment support (receipts, invoices)
+
+#### 3.2.2 Categorization System
+- AI-powered automatic categorization
+- Hierarchical category structure (customizable)
+- Multi-dimensional tagging system
+- Rule-based categorization with learning capability
+- Category mapping for tax and reporting purposes
+
+#### 3.2.3 Account Management
+- Multiple account types (cash, bank, credit, investment)
+- Account balance tracking and reconciliation
+- Inter-account transfers with tracking
+- Account aggregation and net worth calculation
+- Account-specific settings and display options
+
+### 3.3 Tax Management
+
+#### 3.3.1 Income Tax Features
+- Tax regime comparison (old vs. new)
+- Income source tracking and classification
+- Deduction tracking and optimization (80C, 80D, etc.)
+- Tax projection with what-if scenarios
+- Form 16 parsing and integration
+
+#### 3.3.2 GST Management
+- GSTIN validation and verification
+- Invoice-level GST calculation and tracking
+- GSTR preparation and filing assistance
+- Input tax credit optimization
+- GST compliance monitoring and alerts
+
+#### 3.3.3 Tax Document Management
+- Document classification and organization
+- OCR for tax document data extraction
+- Document validation against requirements
+- Secure storage with retention policies
+- Audit-ready documentation preparation
+
+### 3.4 Business Operations
+
+#### 3.4.1 Invoice Management
+- Professional invoice creation with templates
+- Recurring invoice scheduling
+- Payment tracking and reminders
+- GST-compliant invoice generation
+- Invoice approval workflows
+
+#### 3.4.2 Expense Management
+- Expense policy configuration
+- Receipt capture with data extraction
+- Approval workflow with multi-level support
+- Reimbursement tracking
+- Corporate card reconciliation
+
+#### 3.4.3 Vendor & Customer Management
+- Contact database with communication history
+- Payment terms and history tracking
+- Outstanding balance monitoring
+- Vendor performance metrics
+- Customer profitability analysis
+
+### 3.5 Reporting & Analytics
+
+#### 3.5.1 Standard Reports
+- Income and expense summary
+- Cash flow statement
+- Budget vs. actual comparison
+- Tax liability projection
+- GST summary reports
+
+#### 3.5.2 Custom Reporting
+- Report builder with drag-and-drop interface
+- Saved report templates
+- Scheduled report generation
+- Export in multiple formats (PDF, Excel, CSV)
+- Report sharing and permissions
+
+#### 3.5.3 Analytics & Insights
+- Spending pattern analysis
+- Anomaly detection and alerts
+- Predictive cash flow forecasting
+- Savings opportunity identification
+- Financial health scoring
+
+### 3.6 Integration Capabilities
+
+#### 3.6.1 Banking Integrations
+- Bank statement import (manual and automated)
+- Payment gateway integration
+- UPI payment processing
+- Reconciliation with bank data
+- Multi-bank support
+
+#### 3.6.2 Government & Compliance
+- DigiLocker integration for document verification
+- Income tax e-filing integration
+- GST portal integration
+- Aadhaar and PAN verification
+- Digital signature integration
+
+#### 3.6.3 Third-Party Ecosystem
+- Accounting software integration (Tally, Zoho)
+- ERP system connections
+- CRM integration for customer data
+- HR/Payroll system integration
+- E-commerce platform connections
+
+## 4. API SPECIFICATIONS
+
+### 4.1 API Design Principles
+
+#### 4.1.1 Architecture Style
+- RESTful API with resource-oriented design
+- GraphQL API for complex data requirements
+- Webhook support for event-driven integrations
+- Batch operations for efficiency
+- Streaming capabilities for real-time data
+
+#### 4.1.2 Versioning Strategy
+- URI-based versioning (/api/v1/, /api/v2/)
+- Backward compatibility guarantees
+- Deprecation policy with advance notice
+- Version sunset schedule
+- Migration assistance tools
+
+#### 4.1.3 Documentation Standards
+- OpenAPI/Swagger specification
+- Interactive API documentation
+- Code samples in multiple languages
+- Use case examples
+- Status page with uptime monitoring
+
+### 4.2 Core API Resources
+
+#### 4.2.1 User & Authentication APIs
+```
+POST   /api/v2/auth/register
+POST   /api/v2/auth/login
+POST   /api/v2/auth/refresh-token
+POST   /api/v2/auth/mfa/setup
+GET    /api/v2/users/me
+PUT    /api/v2/users/me
+GET    /api/v2/users/{id}/permissions
+POST   /api/v2/tenants/{id}/members
+```
+
+#### 4.2.2 Financial Data APIs
+```
+POST   /api/v2/transactions
+GET    /api/v2/transactions
+GET    /api/v2/transactions/{id}
+PUT    /api/v2/transactions/{id}
+DELETE /api/v2/transactions/{id}
+POST   /api/v2/transactions/bulk
+GET    /api/v2/accounts
+POST   /api/v2/accounts
+GET    /api/v2/categories
+POST   /api/v2/categories
+```
+
+#### 4.2.3 Expense Sharing APIs
+```
+POST   /api/v2/splits
+GET    /api/v2/splits
+GET    /api/v2/splits/{id}
+POST   /api/v2/splits/{id}/participants
+PUT    /api/v2/splits/{id}/settle
+GET    /api/v2/splits/unsettled
+POST   /api/v2/splits/{id}/remind
+```
+
+#### 4.2.4 Tax Management APIs
+```
+GET    /api/v2/tax/profile
+PUT    /api/v2/tax/profile
+GET    /api/v2/tax/deductions
+POST   /api/v2/tax/simulate
+GET    /api/v2/tax/documents
+POST   /api/v2/tax/documents
+GET    /api/v2/gst/summary
+POST   /api/v2/gst/invoices
+```
+
+#### 4.2.5 Business Operation APIs
+```
+POST   /api/v2/invoices
+GET    /api/v2/invoices
+PUT    /api/v2/invoices/{id}
+POST   /api/v2/invoices/{id}/send
+GET    /api/v2/expenses
+POST   /api/v2/expenses
+PUT    /api/v2/expenses/{id}/approve
+GET    /api/v2/vendors
+POST   /api/v2/vendors
+```
+
+#### 4.2.6 Reporting & Analytics APIs
+```
+GET    /api/v2/reports/standard/{report_type}
+POST   /api/v2/reports/custom
+GET    /api/v2/reports/saved
+POST   /api/v2/reports/schedule
+GET    /api/v2/analytics/insights
+GET    /api/v2/analytics/forecast
+GET    /api/v2/analytics/anomalies
+```
+
+### 4.3 Security Requirements
+
+#### 4.3.1 Authentication & Authorization
+- OAuth 2.0 with JWT tokens
+- Short-lived access tokens with refresh capability
+- Granular permission scopes
+- IP-based access restrictions (optional)
+- API key management for service accounts
+
+#### 4.3.2 Data Protection
+- TLS 1.3 for all API communications
+- Field-level encryption for sensitive data
+- PII anonymization options
+- Data masking for non-essential contexts
+- Secure key management with rotation
+
+#### 4.3.3 API Security Controls
+- Rate limiting with tiered thresholds
+- Request validation and sanitization
+- OWASP Top 10 protection measures
+- Brute force protection
+- Comprehensive security logging
+
+### 4.4 Performance Requirements
+
+#### 4.4.1 Response Time Targets
+- P95 response time < 200ms for standard operations
+- P99 response time < 500ms for complex operations
+- Batch operations optimized for throughput
+- Asynchronous processing for long-running operations
+- Performance degradation alerts
+
+#### 4.4.2 Throughput & Capacity
+- Support for 1000+ requests per second per tenant
+- Elastic scaling during peak periods
+- Handling of month-end/year-end traffic spikes
+- Bulk import capacity of 100,000+ transactions
+- Concurrent user session management
+
+#### 4.4.3 Optimization Techniques
+- Response compression
+- Efficient pagination with cursor-based options
+- Partial response with field selection
+- Caching strategy with invalidation
+- Background processing for intensive operations
+
+## 5. DATA MODELS
+
+### 5.1 Core Entities
+
+#### 5.1.1 User & Authentication
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "string",
+    "phone": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "status": "enum(active, inactive, suspended)",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+    "preferences": "object",
+    "default_tenant_id": "uuid"
+  },
+  "tenant": {
+    "id": "uuid",
+    "name": "string",
+    "type": "enum(individual, business, enterprise)",
+    "status": "enum(active, inactive, suspended)",
+    "subscription_plan": "string",
+    "created_at": "timestamp",
+    "settings": "object",
+    "owner_id": "uuid"
+  },
+  "tenant_member": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "user_id": "uuid",
+    "role": "string",
+    "permissions": "array",
+    "joined_at": "timestamp",
+    "status": "enum(active, inactive, pending)"
+  }
+}
+```
+
+#### 5.1.2 Financial Data
+```json
+{
+  "account": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "name": "string",
+    "type": "enum(cash, bank, credit, investment)",
+    "currency": "string",
+    "balance": "decimal",
+    "is_active": "boolean",
+    "institution": "string",
+    "last_synced": "timestamp",
+    "created_at": "timestamp"
+  },
+  "transaction": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "account_id": "uuid",
+    "amount": "decimal",
+    "currency": "string",
+    "date": "date",
+    "description": "string",
+    "category_id": "uuid",
+    "tags": "array",
+    "is_income": "boolean",
+    "status": "enum(pending, cleared, reconciled)",
+    "notes": "string",
+    "attachments": "array",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  },
+  "category": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "name": "string",
+    "type": "enum(income, expense)",
+    "parent_id": "uuid",
+    "icon": "string",
+    "color": "string",
+    "is_system": "boolean",
+    "tax_relevant": "boolean",
+    "tax_category": "string"
+  }
+}
+```
+
+#### 5.1.3 Expense Sharing
+```json
+{
+  "split": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "creator_id": "uuid",
+    "title": "string",
+    "description": "string",
+    "total_amount": "decimal",
+    "currency": "string",
+    "date": "date",
+    "category_id": "uuid",
+    "status": "enum(active, settled, cancelled)",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  },
+  "split_participant": {
+    "id": "uuid",
+    "split_id": "uuid",
+    "user_id": "uuid",
+    "email": "string",
+    "name": "string",
+    "amount": "decimal",
+    "paid": "decimal",
+    "status": "enum(pending, settled, declined)",
+    "settled_at": "timestamp"
+  },
+  "settlement": {
+    "id": "uuid",
+    "split_id": "uuid",
+    "from_participant_id": "uuid",
+    "to_participant_id": "uuid",
+    "amount": "decimal",
+    "currency": "string",
+    "method": "string",
+    "status": "enum(pending, completed, failed)",
+    "reference": "string",
+    "date": "date"
+  }
+}
+```
+
+#### 5.1.4 Tax Management
+```json
+{
+  "tax_profile": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "tax_year": "string",
+    "pan": "string",
+    "regime": "enum(old, new)",
+    "filing_status": "string",
+    "residential_status": "string",
+    "additional_info": "object",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  },
+  "tax_deduction": {
+    "id": "uuid",
+    "tax_profile_id": "uuid",
+    "category": "string",
+    "section": "string",
+    "amount": "decimal",
+    "description": "string",
+    "document_ids": "array",
+    "status": "enum(pending, verified, rejected)",
+    "created_at": "timestamp"
+  },
+  "tax_document": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "type": "string",
+    "tax_year": "string",
+    "file_url": "string",
+    "extracted_data": "object",
+    "status": "enum(pending, processed, error)",
+    "uploaded_at": "timestamp"
+  }
+}
+```
+
+#### 5.1.5 Business Operations
+```json
+{
+  "invoice": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "invoice_number": "string",
+    "customer_id": "uuid",
+    "issue_date": "date",
+    "due_date": "date",
+    "items": "array",
+    "subtotal": "decimal",
+    "tax_amount": "decimal",
+    "total": "decimal",
+    "currency": "string",
+    "status": "enum(draft, sent, paid, overdue, cancelled)",
+    "notes": "string",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  },
+  "expense": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "submitter_id": "uuid",
+    "amount": "decimal",
+    "currency": "string",
+    "date": "date",
+    "category_id": "uuid",
+    "description": "string",
+    "receipt_url": "string",
+    "status": "enum(draft, submitted, approved, rejected, reimbursed)",
+    "approver_id": "uuid",
+    "approval_date": "timestamp",
+    "created_at": "timestamp"
+  },
+  "contact": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "type": "enum(customer, vendor, both)",
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "address": "object",
+    "gstin": "string",
+    "pan": "string",
+    "payment_terms": "string",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  }
+}
+```
+
+### 5.2 Relationships & Constraints
+
+#### 5.2.1 Key Relationships
+- User can belong to multiple Tenants with different roles
+- Transaction belongs to an Account and has one Category
+- Split has multiple Participants and Settlements
+- Invoice has multiple Items and one Customer
+- Expense has one Submitter and one Approver
+
+#### 5.2.2 Data Integrity Constraints
+- Deletion of a User doesn't delete their Transactions
+- Category hierarchy limited to 3 levels
+- Split must have at least 2 Participants
+- Invoice numbers must be unique within a Tenant
+- Tax documents must be associated with valid tax years
+
+#### 5.2.3 Data Validation Rules
+- Email addresses must be properly formatted and verified
+- Phone numbers must be validated with OTP
+- Amounts must be properly formatted with currency
+- Dates must be in ISO 8601 format
+- GST/PAN numbers must pass checksum validation
+
+## 6. IMPLEMENTATION ROADMAP
+
+### 6.1 Phase 1: Core API (Weeks 1-8)
+- Authentication and user management
+- Basic transaction management
+- Simple expense splitting
+- Account management
+- Category management
+- Basic reporting
+
+### 6.2 Phase 2: Enhanced Features (Weeks 9-16)
+- Tax profile and deduction tracking
+- Invoice management
+- Document upload and processing
+- Advanced reporting
+- Bank statement import
+- Mobile-specific API optimizations
+
+### 6.3 Phase 3: Business Features (Weeks 17-24)
+- Multi-tenant capabilities
+- Approval workflows
+- Team management
+- GST compliance features
+- Vendor and customer management
+- Custom reporting
+
+### 6.4 Phase 4: Advanced Capabilities (Weeks 25-32)
+- AI-powered categorization
+- Predictive analytics
+- Integration APIs
+- Advanced security features
+- Performance optimizations
+- Enterprise features
+
+## 7. TECHNICAL CONSIDERATIONS
+
+### 7.1 Technology Stack
+- **Backend**: Node.js with Express/NestJS
+- **Database**: PostgreSQL with JSON capabilities
+- **Caching**: Redis for performance optimization
+- **Search**: Elasticsearch for advanced queries
+- **File Storage**: AWS S3 or equivalent
+- **AI/ML**: TensorFlow for categorization and insights
+
+### 7.2 Deployment Strategy
+- Containerized microservices with Docker
+- Kubernetes for orchestration
+- CI/CD pipeline with automated testing
+- Blue-green deployment for zero downtime
+- Multi-region availability for enterprise clients
+
+### 7.3 Monitoring & Observability
+- Comprehensive logging with structured format
+- Performance metrics collection
+- Error tracking and alerting
+- User behavior analytics
+- Security monitoring and threat detection
+
+## 8. SUCCESS METRICS
+
+### 8.1 Technical KPIs
+- API availability > 99.9%
+- P95 response time < 200ms
+- Error rate < 0.1%
+- Successful transaction processing rate > 99.5%
+- Security incident rate of zero
+
+### 8.2 Business KPIs
+- User onboarding completion rate > 80%
+- Transaction import success rate > 95%
+- Feature adoption across key workflows > 60%
+- User retention after 30 days > 70%
+- Support ticket volume < 0.5% of active users
+
+## 9. APPENDIX
+
+### 9.1 Glossary
+- **API**: Application Programming Interface
+- **JWT**: JSON Web Token
+- **GST**: Goods and Services Tax
+- **PAN**: Permanent Account Number
+- **KYC**: Know Your Customer
+- **UPI**: Unified Payments Interface
+- **OCR**: Optical Character Recognition
+
+### 9.2 References
+- Income Tax Act, 1961
+- GST Act, 2017
+- RBI guidelines for financial data
+- OWASP API Security Top 10
+- REST API design best practices
+
+### 9.3 Open Issues & Decisions
+- Integration strategy with legacy accounting systems
+- Handling of multi-currency transactions
+- Approach for historical data migration
+- Offline capability requirements
+- AI model training and improvement process 

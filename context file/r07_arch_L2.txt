@@ -1,0 +1,873 @@
+# FINZO: LEVEL 2 ARCHITECTURE SPECIFICATION
+
+## 1. INTRODUCTION
+
+This Level 2 Architecture Specification document provides a detailed technical blueprint for the Finzo platform, expanding on the Level 1 Architecture. It maintains alignment with the Product Requirements Document (PRD v2) and Domain Analysis, ensuring comprehensive coverage of all required capabilities.
+
+### 1.1 Purpose and Scope
+
+This document details the component-level architecture, service interactions, data flows, and technology choices for implementing the Finzo platform. It serves as a guide for development teams, system architects, and technical stakeholders.
+
+### 1.2 Relationship to Other Documents
+
+- **Level 1 Architecture (r06_arch_L1.txt)**: Provides the high-level architectural vision that this document expands upon
+- **PRD v2 (r04_prd_v2.txt)**: Outlines product requirements that this architecture fulfills
+- **Domain Analysis (r02_domain_analysis.txt)**: Provides domain-specific knowledge incorporated into this architecture
+
+### 1.3 Architectural Principles
+
+1. **Microservices-Based Design**: Independently deployable, domain-focused services
+2. **API-First Approach**: Well-defined APIs for all service interactions
+3. **Multi-Tenant by Default**: Tenant isolation at all architecture levels
+4. **Security by Design**: Security controls embedded throughout the architecture
+5. **Cloud-Native Implementation**: Leveraging managed services for scalability and reliability
+6. **DevOps Automation**: CI/CD pipelines for all components
+7. **Observability-Driven**: Comprehensive logging, monitoring, and tracing
+8. **Data-Centric Architecture**: Strategic data management and governance
+
+## 2. COMPONENT ARCHITECTURE
+
+### 2.1 Application Layer Components
+
+#### 2.1.1 Web Application
+- **Technologies**: React.js, Redux, TypeScript
+- **Key Components**:
+  - **Dashboard Module**: Financial overview displays for different user types
+  - **Transaction Management**: UI for recording, categorizing, and analyzing transactions
+  - **Expense Sharing**: Bill splitting interface with settlement tracking
+  - **Tax Management**: Tax planning, optimization, and filing preparation tools
+  - **Investment Tracker**: Portfolio visualization and investment monitoring
+  - **Report Builder**: Custom report configuration and visualization
+  - **Settings & Preferences**: User configuration interface
+
+#### 2.1.2 Mobile Applications (iOS & Android)
+- **Technologies**: React Native, TypeScript
+- **Key Components**:
+  - **Receipt Scanner**: Camera integration with OCR processing
+  - **Quick Transaction Entry**: Simplified UI for on-the-go transaction recording
+  - **Notification Center**: Contextual financial alerts and reminders
+  - **Offline Cache**: Local storage for offline operation
+  - **Biometric Authentication**: Fingerprint and facial recognition
+  - **Location Services**: Geo-tagging for transactions
+
+#### 2.1.3 Admin Portal
+- **Technologies**: React.js, TypeScript
+- **Key Components**:
+  - **Tenant Management**: Multi-tenant administration interface
+  - **User Management**: User creation, roles, and permissions
+  - **System Configuration**: Platform-wide settings 
+  - **Analytics Dashboard**: Usage metrics and system performance
+  - **Support Tools**: User assistance and troubleshooting
+
+### 2.2 API Gateway Layer
+
+#### 2.2.1 API Gateway
+- **Technology**: Kong API Gateway
+- **Responsibilities**:
+  - Request routing to appropriate microservices
+  - Authentication validation
+  - Rate limiting and throttling
+  - Request/response transformation
+  - API versioning
+  - Analytics and monitoring
+  - Cache management
+
+#### 2.2.2 Developer Portal
+- **Technology**: Kong Developer Portal
+- **Capabilities**:
+  - API documentation and browsing
+  - API key management
+  - Usage metrics
+  - Code samples and SDKs
+  - OpenAPI specification
+
+### 2.3 Microservices Layer
+
+#### 2.3.1 Identity & Access Management Service
+- **Technology**: Node.js, Express, Passport.js
+- **Capabilities**:
+  - User authentication (password, OAuth, SSO)
+  - Multi-factor authentication
+  - Role-based access control
+  - Tenant-aware authorization
+  - Token management
+  - Password policies and management
+  - Session handling
+
+#### 2.3.2 User Profile Service
+- **Technology**: Node.js, Express
+- **Capabilities**:
+  - User profile management
+  - Preference management
+  - Notification settings
+  - Tenant association
+  - KYC verification
+  - Contact management
+  - User onboarding workflows
+
+#### 2.3.3 Transaction Management Service
+- **Technology**: Java, Spring Boot
+- **Capabilities**:
+  - Transaction CRUD operations
+  - Categorization engine
+  - Recurring transaction handling
+  - Transaction search and filtering
+  - Import/export functionality
+  - Batch processing
+  - Reconciliation
+
+#### 2.3.4 Expense Sharing Service
+- **Technology**: Node.js, Express
+- **Capabilities**:
+  - Split creation and management
+  - Participant management
+  - Settlement tracking
+  - Reminders and notifications
+  - Payment integration
+  - Debt optimization
+  - Group expense management
+
+#### 2.3.5 Tax Management Service
+- **Technology**: Java, Spring Boot
+- **Capabilities**:
+  - Tax profile management
+  - Deduction tracking and categorization
+  - Tax liability calculation
+  - Regime comparison
+  - Filing preparation
+  - Document organization
+  - Tax calendar management
+
+#### 2.3.6 Investment Management Service
+- **Technology**: Python, FastAPI
+- **Capabilities**:
+  - Portfolio tracking across asset classes
+  - NAV/price updates
+  - Performance calculation
+  - Asset allocation analysis
+  - Investment transaction management
+  - Goal-based investing
+  - Market data integration
+
+#### 2.3.7 Business Operations Service
+- **Technology**: Java, Spring Boot
+- **Capabilities**:
+  - Invoice generation and management
+  - Expense approval workflows
+  - Budget management
+  - Vendor/customer management
+  - Business document handling
+  - GST compliance
+  - Multi-entity operations
+
+#### 2.3.8 Reporting & Analytics Service
+- **Technology**: Python, FastAPI
+- **Capabilities**:
+  - Standard report generation
+  - Custom report configuration
+  - Data export
+  - Scheduled reports
+  - Dashboard data preparation
+  - Visualization data formatting
+  - Analytics computation
+
+#### 2.3.9 Notification Service
+- **Technology**: Node.js, Express
+- **Capabilities**:
+  - Notification template management
+  - Delivery channel management (email, SMS, push)
+  - Notification preferences
+  - Delivery status tracking
+  - Scheduled notifications
+  - Batch notification processing
+  - Notification history
+
+#### 2.3.10 Document Management Service
+- **Technology**: Node.js, Express
+- **Capabilities**:
+  - Document upload and storage
+  - OCR processing
+  - Document categorization
+  - Metadata extraction
+  - Search and retrieval
+  - Version control
+  - Document sharing
+
+#### 2.3.11 AI Services
+- **Technology**: Python, FastAPI, TensorFlow
+- **Capabilities**:
+  - Transaction categorization models
+  - Anomaly detection
+  - Expense prediction
+  - Receipt OCR processing
+  - Financial assistant chatbot
+  - Recommendation engine
+  - Document understanding
+
+### 2.4 Integration Layer
+
+#### 2.4.1 Banking Integration Service
+- **Technology**: Java, Spring Boot
+- **Capabilities**:
+  - Bank account linking
+  - Transaction import
+  - Balance retrieval
+  - Payment initiation
+  - Reconciliation
+  - Multi-bank support
+  - Account aggregator framework integration
+
+#### 2.4.2 Payment Gateway Integration Service
+- **Technology**: Node.js, Express
+- **Capabilities**:
+  - Multiple payment gateway support
+  - UPI integration
+  - Payment processing
+  - Settlement tracking
+  - Refund processing
+  - Payment status management
+  - Recurring payment handling
+
+#### 2.4.3 Government Portal Integration Service
+- **Technology**: Java, Spring Boot
+- **Capabilities**:
+  - GST portal integration
+  - Income tax portal integration
+  - DigiLocker integration
+  - PAN verification
+  - Aadhaar verification
+  - Regulatory filing support
+  - Digital signature integration
+
+#### 2.4.4 External Data Provider Service
+- **Technology**: Python, FastAPI
+- **Capabilities**:
+  - Market data retrieval
+  - Exchange rate services
+  - Credit bureau integration
+  - Economic indicator data
+  - Financial news aggregation
+  - Tax regulation updates
+  - Weather data for travel
+
+### 2.5 Data Layer
+
+#### 2.5.1 Primary Databases
+- **Transactional Data**: PostgreSQL (multi-tenant with schema isolation)
+- **User Profiles**: PostgreSQL
+- **Document Metadata**: PostgreSQL
+- **Financial Data**: PostgreSQL
+
+#### 2.5.2 Specialized Databases
+- **Search Engine**: Elasticsearch (transaction search, document search)
+- **Document Storage**: MongoDB (document content, receipt images)
+- **Time Series Data**: InfluxDB (market data, historical prices)
+- **Cache**: Redis (session data, frequently accessed data)
+
+#### 2.5.3 Data Warehouse
+- **Technology**: Snowflake
+- **Purpose**: Analytics, reporting, ML training data
+
+#### 2.5.4 Data Processing
+- **Batch Processing**: Apache Spark
+- **Stream Processing**: Apache Kafka, Kafka Streams
+- **ETL Pipelines**: Airflow
+
+## 3. DETAILED SERVICE INTERACTIONS
+
+### 3.1 Authentication & Authorization Flow
+
+```
+┌──────────┐     ┌────────────┐     ┌──────────────────┐     ┌─────────────┐
+│  Client  │────▶│API Gateway │────▶│Identity & Access │────▶│Target Service│
+│          │◀────│            │◀────│Management Service│◀────│             │
+└──────────┘     └────────────┘     └──────────────────┘     └─────────────┘
+      │                │                     │                      │
+      │                │                     ▼                      │
+      │                │              ┌──────────────┐             │
+      │                └─────────────▶│  User Profile │◀────────────┘
+      └───────────────────────────────│    Service    │
+                                      └──────────────┘
+```
+
+**Sequence**:
+1. Client sends request with authentication token to API Gateway
+2. API Gateway validates token format and forwards to Identity & Access Management Service
+3. Identity & Access Management Service verifies token, checks permissions
+4. If authorized, request is forwarded to target service
+5. Target service may retrieve additional user context from User Profile Service
+6. Response flows back through the chain
+
+### 3.2 Transaction Processing Flow
+
+```
+┌──────────┐     ┌─────────────────┐     ┌────────────┐     ┌─────────────┐
+│  Client  │────▶│Transaction Mgmt │────▶│ AI Service │────▶│Notification │
+│          │◀────│    Service      │◀────│(Categorize)│     │   Service   │
+└──────────┘     └─────────────────┘     └────────────┘     └─────────────┘
+                         │                                         ▲
+                         ▼                                         │
+                  ┌─────────────┐     ┌───────────────┐           │
+                  │   Banking   │────▶│Tax Management │───────────┘
+                  │Integration  │     │    Service    │
+                  └─────────────┘     └───────────────┘
+```
+
+**Sequence**:
+1. Client submits transaction to Transaction Management Service
+2. Transaction is stored and forwarded to AI Service for categorization
+3. If linked to bank, Banking Integration Service is notified for reconciliation
+4. Tax Management Service is updated for tax-relevant transactions
+5. Notification Service sends confirmation to user
+
+### 3.3 Expense Sharing Flow
+
+```
+┌──────────┐     ┌─────────────────┐     ┌────────────────┐
+│  Client  │────▶│ Expense Sharing │────▶│Transaction Mgmt │
+│          │◀────│     Service     │◀────│    Service     │
+└──────────┘     └─────────────────┘     └────────────────┘
+                         │                        │
+                         ▼                        ▼
+                  ┌─────────────┐     ┌─────────────────┐
+                  │ Notification│◀────│Payment Gateway  │
+                  │   Service   │     │Integration      │
+                  └─────────────┘     └─────────────────┘
+```
+
+**Sequence**:
+1. Client creates split expense in Expense Sharing Service
+2. Expense Sharing Service creates underlying transactions via Transaction Management Service
+3. Notification Service informs participants of new split expense
+4. For settlements, Payment Gateway Integration facilitates transfers
+5. Transaction Management Service records settlement transactions
+
+### 3.4 Document Processing Flow
+
+```
+┌──────────┐     ┌─────────────────┐     ┌────────────┐     ┌─────────────┐
+│  Client  │────▶│   Document Mgmt │────▶│ AI Service │────▶│    Tax      │
+│(Receipt) │◀────│     Service     │◀────│   (OCR)    │     │  Service    │
+└──────────┘     └─────────────────┘     └────────────┘     └─────────────┘
+                         │                      │                  │
+                         ▼                      ▼                  ▼
+                  ┌─────────────┐     ┌───────────────┐    ┌─────────────┐
+                  │Transaction  │◀────│Expense Sharing│◀───│ Notification│
+                  │Service      │     │   Service     │    │   Service   │
+                  └─────────────┘     └───────────────┘    └─────────────┘
+```
+
+**Sequence**:
+1. Client uploads receipt to Document Management Service
+2. Document is processed by AI Service for OCR and data extraction
+3. Extracted data is used to create transaction in Transaction Service
+4. If expense sharing applies, Expense Sharing Service is updated
+5. Tax Service records relevant tax information
+6. Notification Service confirms successful processing
+
+## 4. DATA ARCHITECTURE DETAILS
+
+### 4.1 Multi-Tenant Data Strategy
+
+#### 4.1.1 Schema Isolation Approach
+- Each tenant assigned dedicated PostgreSQL schema
+- Common tables in shared schema for system-wide entities
+- Tenant identifier in all queries for additional security
+- Cross-tenant queries restricted to authorized services
+
+#### 4.1.2 Data Access Patterns
+- Repository layer enforces tenant context
+- Middleware injects tenant context into all requests
+- API endpoints validate tenant access rights
+- Database roles aligned with application service boundaries
+
+#### 4.1.3 Tenant Provisioning
+- Automated tenant creation workflow
+- Schema initialization from templates
+- Default configuration deployment
+- Resource allocation based on tenant tier
+
+### 4.2 Data Models (Key Entities)
+
+#### 4.2.1 User & Identity Models
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "string",
+    "phone": "string",
+    "status": "enum(active, inactive, suspended)",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+    "last_login": "timestamp"
+  },
+  "tenant_user": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "user_id": "uuid",
+    "role": "enum(owner, admin, member, accountant, viewer)",
+    "permissions": "array",
+    "status": "enum(active, invited, removed)",
+    "joined_at": "timestamp"
+  },
+  "tenant": {
+    "id": "uuid",
+    "name": "string",
+    "type": "enum(individual, business, enterprise)",
+    "subscription_tier": "enum(free, premium, business, enterprise)",
+    "status": "enum(active, suspended, deleted)",
+    "created_at": "timestamp"
+  }
+}
+```
+
+#### 4.2.2 Financial Models
+```json
+{
+  "account": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "name": "string",
+    "type": "enum(bank, cash, credit, investment, loan)",
+    "balance": "decimal",
+    "currency": "string",
+    "is_active": "boolean",
+    "last_sync": "timestamp",
+    "created_at": "timestamp"
+  },
+  "transaction": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "account_id": "uuid",
+    "amount": "decimal",
+    "currency": "string",
+    "date": "date",
+    "description": "string",
+    "category_id": "uuid",
+    "is_split": "boolean",
+    "reference_id": "string",
+    "status": "enum(pending, cleared, reconciled)",
+    "metadata": "jsonb",
+    "created_at": "timestamp"
+  },
+  "category": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "name": "string",
+    "type": "enum(income, expense)",
+    "parent_id": "uuid",
+    "icon": "string",
+    "is_tax_deductible": "boolean",
+    "tax_category": "string",
+    "created_at": "timestamp"
+  }
+}
+```
+
+#### 4.2.3 Expense Sharing Models
+```json
+{
+  "split": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "created_by": "uuid",
+    "title": "string",
+    "description": "string",
+    "total_amount": "decimal",
+    "currency": "string",
+    "date": "date",
+    "status": "enum(active, settled, cancelled)",
+    "transaction_id": "uuid",
+    "created_at": "timestamp"
+  },
+  "split_participant": {
+    "id": "uuid",
+    "split_id": "uuid",
+    "user_id": "uuid",
+    "email": "string",
+    "name": "string",
+    "amount": "decimal",
+    "paid_amount": "decimal",
+    "status": "enum(pending, accepted, declined, settled)",
+    "created_at": "timestamp"
+  },
+  "settlement": {
+    "id": "uuid",
+    "split_id": "uuid",
+    "from_participant_id": "uuid",
+    "to_participant_id": "uuid",
+    "amount": "decimal",
+    "currency": "string",
+    "status": "enum(pending, completed, failed)",
+    "payment_method": "string",
+    "payment_reference": "string",
+    "transaction_id": "uuid",
+    "created_at": "timestamp"
+  }
+}
+```
+
+### 4.3 Data Flows
+
+#### 4.3.1 Transactional Data Flow
+- User actions create/modify data in service databases
+- Transactional consistency maintained within service boundaries
+- Eventual consistency across service boundaries via events
+- Critical cross-service transactions use saga pattern
+
+#### 4.3.2 Analytical Data Flow
+- Change data capture from transactional databases
+- Streaming pipelines for near real-time analytics
+- Batch ETL for complex aggregations
+- Star schema design in data warehouse
+- Materialized views for reporting performance
+
+#### 4.3.3 ML Data Flow
+- Feature engineering pipelines from raw data
+- Training data preparation jobs
+- Model training infrastructure
+- Model serving via API endpoints
+- Feedback loops for model improvement
+
+### 4.4 Data Retention & Archival
+- Transactional data: 7 years active, archived thereafter
+- Document storage: 10 years
+- Audit logs: 7 years
+- Analytics data: Aggregated after 3 years
+- User data: Retained until account deletion + legal hold period
+
+## 5. SECURITY ARCHITECTURE
+
+### 5.1 Identity & Access Management
+
+#### 5.1.1 Authentication Methods
+- Username/password with strong password policies
+- OAuth 2.0 integration (Google, Facebook, Apple)
+- Multi-factor authentication (SMS, TOTP, WebAuthn)
+- JWT for session management
+- Refresh token rotation
+
+#### 5.1.2 Authorization Framework
+- Role-based access control (RBAC)
+- Attribute-based policies for fine-grained control
+- Permission inheritance through role hierarchy
+- Just-in-time access for administrative functions
+- Context-aware authorization (device, location, time)
+
+### 5.2 API Security
+
+#### 5.2.1 API Protection Mechanisms
+- OAuth 2.0 with JWT for API authentication
+- API key management for external developers
+- HMAC request signing for server-to-server calls
+- Rate limiting based on user tier and endpoint sensitivity
+- Request validation against JSON schemas
+
+#### 5.2.2 Input Validation
+- Strict schema validation for all inputs
+- Parameter sanitization
+- Content type validation
+- Size limits for uploads
+- Anti-automation measures for sensitive endpoints
+
+### 5.3 Data Security
+
+#### 5.3.1 Encryption Strategy
+- Data at rest: AES-256 encryption
+- Data in transit: TLS 1.3
+- Field-level encryption for PII and financial data
+- Key management via AWS KMS or Azure Key Vault
+- Client-side encryption for highly sensitive documents
+
+#### 5.3.2 Data Classification
+- Public: No restriction
+- Internal: Available to all authenticated users
+- Confidential: Limited to specific roles
+- Restricted: Limited to specific users with MFA
+- Highly Restricted: Only available through special access procedures
+
+### 5.4 Security Monitoring
+
+#### 5.4.1 Audit Logging
+- Comprehensive audit trails for all user actions
+- Service-to-service communication logging
+- Administrative action logging
+- Authentication event logging
+- Data access logging for sensitive information
+
+#### 5.4.2 Threat Detection
+- Anomalous login detection
+- Suspicious transaction monitoring
+- Unusual data access patterns
+- Known attack pattern recognition
+- Geographic anomaly detection
+
+## 6. INTEGRATION ARCHITECTURE
+
+### 6.1 External System Integrations
+
+#### 6.1.1 Banking System Integration
+- Account information services (AIS)
+- Transaction history retrieval
+- Balance checking
+- Standing order information
+- Account ownership verification
+- Multi-bank aggregation
+
+#### 6.1.2 Payment Gateway Integration
+- Multiple payment provider support (Razorpay, PayU, Stripe)
+- Payment initiation and status tracking
+- Refund processing
+- Subscription management
+- Settlement reconciliation
+- Split payment handling
+
+#### 6.1.3 Government Portal Integration
+- GST filing data preparation
+- Income tax return data generation
+- Digital signature integration
+- Form submission automation
+- Compliance status checking
+- Document retrieval from DigiLocker
+
+### 6.2 Integration Patterns
+
+#### 6.2.1 Synchronous Integration
+- REST APIs with OpenAPI specifications
+- GraphQL for complex data requirements
+- gRPC for high-performance internal services
+- Webhook callbacks for completion notification
+- Circuit breakers for failure handling
+
+#### 6.2.2 Asynchronous Integration
+- Event-driven architecture via Kafka
+- Message queues for task processing
+- Publish-subscribe for notifications
+- Dead letter queues for failed processing
+- Idempotent receivers for reliability
+
+### 6.3 API Management
+
+#### 6.3.1 Internal APIs
+- Service mesh for service discovery and communication
+- Centralized authentication and authorization
+- Consistent error handling
+- Rate limiting and circuit breaking
+- API contract testing
+
+#### 6.3.2 External APIs
+- Versioned public APIs
+- Developer documentation
+- Sandbox environment
+- Usage quotas and throttling
+- SLA monitoring
+
+## 7. DEPLOYMENT ARCHITECTURE
+
+### 7.1 Infrastructure Specifications
+
+#### 7.1.1 Kubernetes Cluster Configuration
+- Multi-zone deployment for high availability
+- Node pools optimized for different workloads
+- Autoscaling based on CPU, memory, and custom metrics
+- Pod security policies
+- Network policies for service isolation
+
+#### 7.1.2 Database Infrastructure
+- Primary-replica configuration for PostgreSQL
+- Multi-region deployment for disaster recovery
+- Connection pooling
+- Automated backup schedule
+- Point-in-time recovery capability
+
+#### 7.1.3 Storage Infrastructure
+- Object storage for documents and media
+- Block storage for databases
+- Cold storage for archival data
+- CDN for static assets
+- Caching layer for frequently accessed content
+
+### 7.2 Deployment Strategy
+
+#### 7.2.1 Deployment Pipeline
+- CI/CD workflow for all components
+- Infrastructure as Code with Terraform
+- Blue-green deployments for zero downtime
+- Canary releases for risk reduction
+- Automated rollback capability
+
+#### 7.2.2 Environment Strategy
+- Development: Feature development and testing
+- Staging: Integration testing and UAT
+- Production: Live application
+- DR: Disaster recovery environment
+- Sandbox: Third-party integration testing
+
+### 7.3 Scalability Approach
+
+#### 7.3.1 Horizontal Scaling
+- Stateless services scaled horizontally
+- Database read replicas for query scaling
+- Sharding strategy for large tenants
+- Regional deployment for global scaling
+- Load balancing across instances
+
+#### 7.3.2 Performance Optimization
+- Caching strategy (application, database, CDN)
+- Query optimization and indexing
+- Background processing for compute-intensive tasks
+- Asynchronous processing where possible
+- Lazy loading of non-critical data
+
+### 7.4 Disaster Recovery
+
+#### 7.4.1 Backup Strategy
+- Database: Daily full, hourly incremental
+- Document storage: Continuous replication
+- Configuration: Version-controlled and backed up
+- Encryption keys: HSM-backed with secure escrow
+- Retention policy aligned with compliance requirements
+
+#### 7.4.2 Recovery Procedures
+- RTO (Recovery Time Objective): < 4 hours
+- RPO (Recovery Point Objective): < 15 minutes
+- Automated recovery testing
+- Failover procedures with minimal manual intervention
+- Regular DR drills
+
+## 8. OBSERVABILITY ARCHITECTURE
+
+### 8.1 Monitoring Strategy
+
+#### 8.1.1 Infrastructure Monitoring
+- CPU, memory, disk, and network utilization
+- Kubernetes cluster health
+- Database performance metrics
+- Queue lengths and processing rates
+- Error rates and system events
+
+#### 8.1.2 Application Monitoring
+- Response times by endpoint
+- Error rates by service
+- Transaction throughput
+- Dependency health
+- Custom business metrics
+
+#### 8.1.3 End-User Experience Monitoring
+- Page load times
+- API response times
+- Client-side errors
+- User journey completion rates
+- Feature adoption metrics
+
+### 8.2 Logging Framework
+
+#### 8.2.1 Log Management
+- Centralized log collection
+- Structured logging format
+- Log level management by environment
+- Retention policy by log type
+- Sensitive data masking
+
+#### 8.2.2 Log Analysis
+- Real-time log searching
+- Log correlation across services
+- Pattern recognition for anomalies
+- Automated alerting on log patterns
+- Integration with incident management
+
+### 8.3 Tracing System
+
+#### 8.3.1 Distributed Tracing
+- OpenTelemetry instrumentation
+- End-to-end transaction tracing
+- Service dependency mapping
+- Performance bottleneck identification
+- Error context capture
+
+#### 8.3.2 Trace Analysis
+- Trace visualization and exploration
+- Performance trending over time
+- Outlier detection
+- Root cause analysis
+- Service-level objective tracking
+
+### 8.4 Alerting and Incident Response
+
+#### 8.4.1 Alert Design
+- Alert prioritization framework
+- Actionable alert content
+- Intelligent grouping to reduce noise
+- Contextual information inclusion
+- Routing based on service ownership
+
+#### 8.4.2 Incident Management
+- On-call rotation and escalation policies
+- Incident classification framework
+- Automated runbook integration
+- Post-incident review process
+- Incident metrics tracking
+
+## 9. TECHNICAL DEBT MANAGEMENT
+
+### 9.1 Code Quality Maintenance
+
+#### 9.1.1 Code Standards
+- Language-specific style guides
+- Static code analysis in CI pipeline
+- Code complexity metrics
+- Test coverage requirements
+- Peer review process
+
+#### 9.1.2 Refactoring Strategy
+- Regular refactoring sprints
+- Incremental improvements with features
+- Service extraction for growing components
+- Database schema evolution practices
+- API versioning for breaking changes
+
+### 9.2 Documentation Requirements
+
+#### 9.2.1 Architecture Documentation
+- Component diagrams kept updated
+- Service interaction documentation
+- Decision records for key choices
+- Pattern library for common solutions
+- Technology radar for evaluating new technologies
+
+#### 9.2.2 Developer Documentation
+- API documentation with examples
+- Service setup instructions
+- Dependency documentation
+- Troubleshooting guides
+- Onboarding materials
+
+## 10. IMPLEMENTATION ROADMAP
+
+### 10.1 Foundation Phase (Months 1-3)
+- Core authentication and user management services
+- Basic transaction management functionality
+- Multi-tenant database foundation
+- CI/CD pipeline setup
+- Base infrastructure deployment
+
+### 10.2 MVP Phase (Months 4-6)
+- Expense splitting features
+- Basic tax calculation capabilities
+- Mobile app with essential features
+- Banking integration foundation
+- Document management with basic OCR
+
+### 10.3 Growth Phase (Months 7-12)
+- Advanced AI capabilities
+- Enhanced tax optimization
+- Investment tracking features
+- Business operations functionality
+- Expanded integrations
+
+### 10.4 Enterprise Phase (Months 13-18)
+- Advanced multi-tenant capabilities
+- Enterprise-grade reporting
+- Advanced security features
+- Performance optimization for scale
+- Compliance certifications 

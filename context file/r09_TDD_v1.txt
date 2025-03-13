@@ -1,0 +1,404 @@
+# FINZO: TEST-DRIVEN DEVELOPMENT IMPLEMENTATION PLAN
+
+## 1. INTRODUCTION
+
+This document outlines a Test-Driven Development (TDD) approach to implementing the Finzo architecture in the most minimalistic way while ensuring core functionality. It provides a structured path from foundational services to a working MVP, based on the Level 2 Architecture Specification (r07_arch_L2.txt), while maintaining alignment with the Product Requirements Document (r04_prd_v2.txt) and Domain Analysis (r02_domain_analysis.txt).
+
+### 1.1 TDD Philosophy for Finzo
+
+For Finzo implementation, TDD will follow these principles:
+
+1. **Outside-In Approach**: Start with high-level acceptance tests, then work inward to unit tests
+2. **Minimalistic Implementation**: Build only what's needed to pass tests
+3. **Continuous Refactoring**: Improve code without changing functionality
+4. **Domain-Driven Design**: Tests express domain concepts and business rules
+5. **Service Boundaries**: Respect microservice boundaries in test organization
+
+### 1.2 Minimalistic Implementation Strategy
+
+To achieve a minimalistic implementation:
+
+1. **Core Over Completeness**: Focus on essential features first
+2. **Vertical Slices**: Implement thin end-to-end functionality before expanding
+3. **Manual Fallbacks**: Allow for manual processes where automation isn't critical for MVP
+4. **Simplified Infrastructure**: Use containerized local development before full Kubernetes
+5. **Strategic Technical Debt**: Document areas for future improvement
+
+## 2. TEST ORGANIZATION
+
+### 2.1 Test Hierarchy
+
+```
+finzo-tests/
+├── acceptance-tests/       # End-to-end tests across services
+│   ├── user-journeys/      # Tests for complete user journeys
+│   └── api-contracts/      # API contract tests
+├── integration-tests/      # Tests between services
+│   ├── service-to-service/ # Direct service interactions
+│   └── data-flows/         # Data flowing between services
+└── unit-tests/             # Within each service repository
+    ├── service-name-1/     # Tests for specific service
+    ├── service-name-2/
+    └── ...
+```
+
+### 2.2 Test Naming Convention
+
+Tests should follow a descriptive naming pattern:
+```
+Given[Precondition]_When[Action]_Then[ExpectedResult]
+```
+
+Example: `GivenAuthenticatedUser_WhenSubmittingTransaction_ThenTransactionIsStored`
+
+## 3. IMPLEMENTATION SEQUENCE
+
+### 3.1 Foundation Phase
+
+#### 3.1.1 Identity & Access Management Service
+
+**Test First:**
+1. `WhenUserRegisters_ThenAccountIsCreated`
+2. `WhenUserLogsIn_ThenJWTTokenIsIssued`
+3. `GivenAuthenticatedUser_WhenAccessingResource_ThenAccessIsGranted`
+4. `GivenUserWithInsufficientPermissions_WhenAccessingResource_ThenAccessIsDenied`
+
+**Minimal Implementation:**
+- Basic user registration/login
+- JWT authentication
+- Simple RBAC without fine-grained permissions
+- In-memory user store initially (migrate to PostgreSQL later)
+- Skip OAuth integration for MVP
+
+#### 3.1.2 User Profile Service
+
+**Test First:**
+1. `WhenFetchingUserProfile_ThenDetailsAreReturned`
+2. `WhenUpdatingUserProfile_ThenChangesArePersisted`
+3. `GivenMultipleTenants_WhenAccessingProfile_ThenCorrectTenantDataIsReturned`
+
+**Minimal Implementation:**
+- Basic profile CRUD operations
+- Essential fields only (name, email, phone)
+- Tenant association
+- PostgreSQL storage with schema isolation
+
+#### 3.1.3 API Gateway
+
+**Test First:**
+1. `WhenRequestingProtectedEndpoint_ThenAuthorizationIsValidated`
+2. `WhenRoutingRequest_ThenCorrectServiceReceivesIt`
+3. `WhenServiceIsDown_ThenAppropriateErrorIsReturned`
+
+**Minimal Implementation:**
+- Route configuration for essential services
+- Authentication validation
+- Basic error handling
+- Skip rate limiting for MVP
+
+### 3.2 Core Functionality Phase
+
+#### 3.2.1 Transaction Management Service
+
+**Test First:**
+1. `WhenCreatingTransaction_ThenTransactionIsPersisted`
+2. `WhenFetchingTransactions_ThenCorrectTransactionsAreReturned`
+3. `GivenExistingTransaction_WhenUpdating_ThenChangesArePersisted`
+4. `GivenTransaction_WhenCategorizationRequested_ThenAIServiceIsCalled`
+
+**Minimal Implementation:**
+- Transaction CRUD operations
+- Basic filtering and pagination
+- Simple categorization request to AI service
+- Skip advanced search capabilities for MVP
+
+#### 3.2.2 AI Service (Minimal Version)
+
+**Test First:**
+1. `GivenTransactionData_WhenCategorizingTransaction_ThenCategoryIsReturned`
+2. `GivenReceiptImage_WhenExtractingData_ThenTransactionDetailsAreReturned`
+
+**Minimal Implementation:**
+- Rule-based categorization engine (instead of ML initially)
+- Basic OCR integration for receipts
+- Hard-coded rules for common transaction patterns
+- Document plans for ML implementation post-MVP
+
+#### 3.2.3 Expense Sharing Service
+
+**Test First:**
+1. `WhenCreatingSplitExpense_ThenSplitIsPersisted`
+2. `WhenAddingParticipant_ThenParticipantIsAddedToSplit`
+3. `WhenSettlingDebt_ThenSettlementIsRecorded`
+4. `GivenActiveSplit_WhenCalculatingBalances_ThenCorrectAmountsAreReturned`
+
+**Minimal Implementation:**
+- Split creation with participants
+- Basic splitting algorithms (equal, percentage)
+- Settlement tracking
+- Skip complex debt optimization for MVP
+
+### 3.3 Integration Phase
+
+#### 3.3.1 Notification Service
+
+**Test First:**
+1. `WhenEventOccurs_ThenNotificationIsQueued`
+2. `WhenProcessingQueue_ThenNotificationsAreSent`
+3. `GivenUserPreferences_WhenSendingNotification_ThenCorrectChannelIsUsed`
+
+**Minimal Implementation:**
+- Event-based notification queuing
+- Email delivery only (skip SMS/push for MVP)
+- Basic templates for essential notifications
+- Simple preference management
+
+#### 3.3.2 Document Management Service
+
+**Test First:**
+1. `WhenUploadingDocument_ThenDocumentIsStored`
+2. `WhenRequestingDocument_ThenDocumentIsRetrieved`
+3. `GivenReceipt_WhenProcessing_ThenAIServiceIsInvoked`
+
+**Minimal Implementation:**
+- Document upload/download
+- Basic metadata tracking
+- Simple categorization
+- Integration with AI service for OCR
+- Local storage (S3 integration later)
+
+#### 3.3.3 Banking Integration Service (Simplified)
+
+**Test First:**
+1. `WhenLinkingBankAccount_ThenCredentialsAreSecurelyStored`
+2. `WhenFetchingTransactions_ThenTransactionsAreImported`
+
+**Minimal Implementation:**
+- Manual bank statement import (CSV)
+- Transaction parsing and normalization
+- Skip direct bank API integration for MVP
+- Document plans for Account Aggregator integration post-MVP
+
+### 3.4 Business Features Phase
+
+#### 3.4.1 Tax Management Service (Simplified)
+
+**Test First:**
+1. `GivenTransactions_WhenCalculatingTaxLiability_ThenCorrectAmountIsReturned`
+2. `WhenCategorizing_ThenTaxDeductionStatusIsIdentified`
+3. `GivenDeductions_WhenComparingRegimes_ThenOptimalRegimeIsRecommended`
+
+**Minimal Implementation:**
+- Basic income tax calculation (old vs new regime)
+- Simple deduction tracking
+- Tax category identification for transactions
+- Skip direct filing integration for MVP
+
+#### 3.4.2 Business Operations Service (Core Only)
+
+**Test First:**
+1. `WhenCreatingInvoice_ThenInvoiceIsPersisted`
+2. `GivenInvoice_WhenCalculatingTax_ThenCorrectGSTIsApplied`
+3. `WhenCreatingExpenseRequest_ThenApprovalWorkflowIsInitiated`
+
+**Minimal Implementation:**
+- Basic invoice generation
+- Simple GST calculation
+- Minimal approval workflows
+- Skip advanced business features for MVP
+
+## 4. CROSS-CUTTING CONCERNS
+
+### 4.1 Database Tests
+
+**Test First:**
+1. `GivenTenant_WhenCreatingSchema_ThenSchemaIsIsolated`
+2. `WhenExecutingQuery_ThenTenantContextIsEnforced`
+3. `GivenLargeDataset_WhenQuerying_ThenPerformanceIsAcceptable`
+
+**Minimal Implementation:**
+- PostgreSQL with schema-per-tenant
+- Basic indexing strategy
+- Simple backup/restore procedures
+- Document more advanced needs for later implementation
+
+### 4.2 API Contract Tests
+
+**Test First:**
+1. `WhenCallingAPIEndpoint_ThenResponseMatchesSpecification`
+2. `WhenInvalidRequest_ThenProperErrorIsReturned`
+3. `WhenVersionChanges_ThenBackwardCompatibilityIsPreserved`
+
+**Minimal Implementation:**
+- OpenAPI specifications for all services
+- Shared models between services
+- Contract validation in CI pipeline
+
+### 4.3 Security Tests
+
+**Test First:**
+1. `GivenInvalidToken_WhenAccessingAPI_ThenAccessIsDenied`
+2. `WhenStoringSensitiveData_ThenDataIsEncrypted`
+3. `GivenSQLInjectionAttempt_ThenAttackIsBlocked`
+
+**Minimal Implementation:**
+- Basic authentication validation
+- Input sanitization
+- Encryption for sensitive data
+- OWASP top 10 mitigations
+
+## 5. DEVELOPMENT WORKFLOW
+
+### 5.1 TDD Workflow
+
+1. **Write Failing Test**: Create test for new functionality
+2. **Implement Minimally**: Write just enough code to pass test
+3. **Refactor**: Improve code without changing functionality
+4. **Commit**: Check in with test and implementation together
+5. **Repeat**: Continue with next test
+
+### 5.2 CI/CD Integration
+
+**Minimal CI Pipeline:**
+1. Run unit tests
+2. Run integration tests
+3. Run API contract tests
+4. Static code analysis
+5. Build and publish Docker images
+
+**Minimal CD Pipeline:**
+1. Deploy to development environment
+2. Run acceptance tests
+3. Manual approval for production
+4. Deploy to production
+5. Post-deployment verification
+
+### 5.3 Environment Setup
+
+**Local Development:**
+- Docker Compose for local service orchestration
+- Local database instances
+- Mock external dependencies
+
+**Testing Environment:**
+- Kubernetes namespace for integration testing
+- Isolated database instances
+- Mock third-party services
+
+**Production:**
+- Minimal Kubernetes setup (essentials only)
+- Managed PostgreSQL with backup/restore
+- Basic monitoring and alerting
+
+## 6. FEATURE PRIORITIES FOR TDD
+
+### 6.1 Must-Have Features (MVP)
+
+1. **User Authentication & Profiles**
+   - Registration, login, basic profile management
+   - Tenant isolation
+
+2. **Transaction Management**
+   - Transaction recording and categorization
+   - Basic reporting and filtering
+
+3. **Expense Sharing**
+   - Split creation with participants
+   - Balance calculation and settlement tracking
+
+4. **Document Management**
+   - Receipt uploading and basic OCR
+   - Document categorization and storage
+
+5. **Basic Tax Calculations**
+   - Deduction tracking
+   - Simple tax liability estimation
+
+### 6.2 Nice-to-Have Features (Post-MVP)
+
+1. **Banking Integration**
+   - Direct bank connections
+   - Automated transaction import
+
+2. **Advanced AI Capabilities**
+   - ML-based categorization
+   - Anomaly detection
+   - Financial insights
+
+3. **Investment Tracking**
+   - Portfolio management
+   - Performance analysis
+
+4. **Mobile Experience Enhancements**
+   - Offline capabilities
+   - Push notifications
+
+5. **Business Operations**
+   - Advanced invoice management
+   - Approval workflows
+   - Vendor management
+
+## 7. TEST DATA MANAGEMENT
+
+### 7.1 Test Data Strategy
+
+1. **Fixtures**: Pre-defined data sets for specific test scenarios
+2. **Factories**: Generate test data with specific characteristics
+3. **Anonymized Real Data**: For performance and integration testing
+
+### 7.2 Database Management
+
+1. **Test Isolation**: Each test runs in isolation with clean state
+2. **In-Memory Option**: Use in-memory databases for unit tests where possible
+3. **Test Containers**: Use containerized databases for integration tests
+
+## 8. MOCKING STRATEGY
+
+### 8.1 When to Mock
+
+1. **External Services**: Third-party APIs, payment gateways
+2. **Slow Operations**: Long-running processes that slow tests
+3. **Cross-Service Boundaries**: When testing a single service in isolation
+4. **Non-deterministic Behavior**: Random or time-based functionality
+
+### 8.2 When Not to Mock
+
+1. **Core Domain Logic**: Business rules should be tested with real implementations
+2. **Database Access**: Use test databases instead of mocks for data access
+3. **Critical Flows**: End-to-end tests for critical paths should use minimal mocking
+
+## 9. ACCEPTANCE CRITERIA FOR MVP COMPLETION
+
+The MVP implementation is complete when:
+
+1. **Core User Journeys**: All must-have features pass their acceptance tests
+2. **Performance Baselines**: Response times are within acceptable ranges
+3. **Security Requirements**: Basic security tests pass
+4. **Data Integrity**: ACID properties are verified for critical transactions
+5. **Multi-tenant Isolation**: Tenant data isolation is confirmed
+
+## 10. IMPLEMENTATION TIMELINE
+
+### 10.1 Phase 1: Foundation (Weeks 1-4)
+- Set up development environment and CI/CD
+- Implement Identity & Access Management Service
+- Implement User Profile Service
+- Set up API Gateway
+
+### 10.2 Phase 2: Core Features (Weeks 5-10)
+- Implement Transaction Management Service
+- Implement simplified AI Service
+- Implement Expense Sharing Service
+- Implement Document Management Service
+
+### 10.3 Phase 3: Integration (Weeks 11-14)
+- Implement Notification Service
+- Implement Banking Integration (simplified)
+- Implement Tax Management Service (basic)
+- Integration testing and bug fixing
+
+### 10.4 Phase 4: Refinement (Weeks 15-16)
+- Performance optimization
+- Security hardening
+- Documentation
+- Prepare for production deployment 

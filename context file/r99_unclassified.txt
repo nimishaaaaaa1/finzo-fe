@@ -1,0 +1,189 @@
+# FINZO PROJECT: UNCLASSIFIED NOTES & OBSERVATIONS
+
+This file documents miscellaneous ideas, challenges, knowledge gaps, and other observations encountered during the development of the Finzo platform. These notes capture the "behind the scenes" aspects of the project that may not be formally documented elsewhere but provide valuable context and learning opportunities.
+
+## IDEATION & REQUIREMENTS PHASE (JAN-FEB 2025)
+
+### 2025-01-10 - Initial Knowledge Gaps
+- Need to research the latest GST filing regulations for different business categories
+- Uncertain about the technical limitations of UPI payment integration for bill settlements
+- Need clarification on whether to support old tax regime calculation logic after 2025 rules
+- Reference needed: Find current API documentation for major Indian banks
+
+### 2025-01-16 - Conflicting Requirements
+- Business stakeholders want Splitwise-like simplicity but also advanced enterprise features
+- Tension between making app lightweight vs. feature-rich is creating scope creep risk
+- Should the platform have separate B2C and B2B interfaces or a unified approach?
+- Observation: Most financial apps in market either focus on consumers OR businesses, not both
+
+### 2025-01-23 - Overlooked Requirements
+- Forgot to include multi-currency support in initial PRD
+- Didn't account for compliance requirements related to financial data storage (RBI guidelines)
+- Need to validate if NPCI has any specific requirements for integrating with UPI
+- Tax consultation needed: What happens with tax filing for users with multiple income sources?
+
+### 2025-02-05 - Market Research Gaps
+- Insufficient analysis of competitors in B2B expense management (SAP Concur, Expensify)
+- Need more data on user pain points for tax filing (interview more potential users)
+- Missing benchmark data for typical transaction volumes to plan database sizing
+- Question: Are there any Indian startups already solving this problem we should analyze?
+
+### 2025-02-17 - Domain Knowledge Enhancement Needed
+- GST calculation for special economic zones and export transactions is more complex than initially understood
+- Document storage requirements and retention periods for tax compliance need expert input
+- Different depreciation calculation methods for business assets (straight-line vs. reducing balance)
+- Reference needed: Income Tax Department guidelines for digital record-keeping
+
+## ARCHITECTURE & DESIGN PHASE (MAR-APR 2025)
+
+### 2025-03-04 - Technical Architecture Concerns
+- Debate: Should we use schema-per-tenant or row-level security for multi-tenancy?
+- Potential issue: Session management across multiple tenants could be tricky
+- Knowledge gap: Best practices for securing financial APIs against common threats
+- Need benchmark data on MongoDB performance for financial transaction storage at scale
+
+### 2025-03-12 - Database Design Challenges
+- Mistake identified: Initial data model didn't account for complex split scenarios (percentage, unequal, item-based)
+- Currency precision issues: Need to ensure decimal handling doesn't cause financial calculation errors
+- Should historical transaction data be archived after a certain period for performance?
+- Research needed: How do other financial platforms handle data partitioning for multi-year records?
+
+### 2025-03-24 - Security Design Oversights
+- Didn't initially plan for field-level encryption for sensitive data like PAN numbers
+- Need more robust approach to API key management than initially designed
+- Audit logging requirements more extensive than initially scoped
+- Question: Should we support hardware security keys for high-value business accounts?
+
+### 2025-04-07 - UI/UX Design Challenges
+- Tension between simple UI for consumers and data-rich displays for business users
+- Mobile-first design making some complex financial reports hard to display effectively
+- Need more user research on preference for wizard-style flows vs. form-based data entry
+- Idea: Consider custom UI components for specialized financial interactions
+
+### 2025-04-21 - Integration Architecture Limitations
+- Bank statement import formats more varied than initially estimated (each bank uses different CSV formats)
+- OCR receipt processing accuracy lower than expected in initial prototypes
+- Webhook management for real-time notification events needs more robust design
+- Knowledge gap: OAuth implementation best practices for financial service integrations
+
+## DEVELOPMENT PHASE (MAY-AUG 2025)
+
+### 2025-05-05 - Development Environment Issues
+- Docker container networking causing intermittent connectivity issues between services
+- Local development database seeding scripts incomplete, slowing developer onboarding
+- Test data generation for financial transactions not realistic enough for proper testing
+- Reference needed: More comprehensive test cases for tax calculation edge cases
+
+### 2025-05-19 - Coding Standards Challenges
+- Inconsistent error handling patterns between teams causing integration issues
+- REST API resource naming conventions not consistently followed
+- Lack of standardized approach to pagination and filtering across endpoints
+- Idea: Create central library for common financial calculations to ensure consistency
+
+### 2025-06-02 - Technical Debt Accumulation
+- Temporary workarounds for multi-tenant query filtering becoming permanent
+- Authentication service needs refactoring to support planned OAuth provider integration
+- Test coverage for edge cases in split expense calculations insufficient
+- Observation: Teams prioritizing feature development over documentation
+
+### 2025-06-16 - Performance Concerns
+- Transaction listing API endpoint performance degrades with large datasets
+- Receipt image processing creating unexpected load on application servers
+- Redis cache invalidation strategy not working effectively for multi-tenant data
+- Research needed: More efficient indexing strategies for financial transaction queries
+
+### 2025-07-07 - Security Implementation Issues
+- CSRF protection implementation incomplete on some form submissions
+- JWT token refresh mechanism has potential race condition
+- Input validation for financial values inconsistent across different forms
+- Question: Should we implement IP-based rate limiting for sensitive operations?
+
+### 2025-07-21 - Mobile Responsiveness Challenges
+- Complex financial tables not rendering well on mobile devices
+- PDF generation for invoices and reports not optimized for mobile viewing
+- Touch target size issues on transaction management screens
+- Idea: Consider progressive disclosure pattern for complex data on mobile
+
+### 2025-08-11 - Third-Party Integration Issues
+- Payment gateway test environment inconsistent with production behavior
+- Bank statement import parser breaking on unexpected format variations
+- GST portal API documentation outdated compared to actual implementation
+- Need more robust error handling for external service unavailability
+
+### 2025-08-25 - Documentation Gaps
+- API documentation not kept in sync with implementation changes
+- Missing developer onboarding guide for new team members
+- User documentation lacks examples for complex financial scenarios
+- Observation: Need better process for keeping technical documentation updated
+
+## TESTING PHASE (SEP-OCT 2025)
+
+### 2025-09-08 - Test Environment Limitations
+- Test data not diverse enough to cover all financial edge cases
+- Performance testing environment not representative of production scale
+- Difficulty simulating multi-tenant isolation in automated tests
+- Reference needed: Testing patterns for financial calculation accuracy
+
+### 2025-09-22 - Testing Coverage Gaps
+- Insufficient testing of concurrent updates to shared resources (split expenses)
+- Mobile device testing limited to handful of devices/browsers
+- API contract testing not comprehensive across all service boundaries
+- Idea: Implement property-based testing for financial calculations
+
+### 2025-10-06 - UAT Preparation Challenges
+- UAT test cases missing coverage for some business scenarios
+- Test environment data refresh process unreliable
+- Need financial domain experts for specialized testing (tax calculations)
+- Question: How to simulate a full financial year cycle during UAT?
+
+### 2025-10-20 - UAT Execution Issues
+- Discovered edge cases in tax calculation not covered by requirements
+- Users confused by terminology differences between application and common financial terms
+- Performance issues only manifesting under realistic user interaction patterns
+- Observation: Business users focusing on different aspects than development team anticipated
+
+## DEPLOYMENT & OPERATIONS PLANNING (NOV-DEC 2025)
+
+### 2025-11-03 - Deployment Planning Oversights
+- Database migration scripts not tested with production-like data volumes
+- Rollback procedures incomplete for some deployment steps
+- Zero-downtime deployment approach needed revision for database schema changes
+- Reference needed: Best practices for financial application maintenance windows
+
+### 2025-11-17 - Monitoring & Observability Gaps
+- Insufficient logging for reconciliation of financial transactions
+- Alert thresholds not properly calibrated for business hours vs. off-hours
+- No monitoring for third-party service degradation affecting platform
+- Idea: Create financial transaction reconciliation dashboard for operations team
+
+### 2025-12-01 - Disaster Recovery Limitations
+- RTO/RPO objectives may not be achievable with current backup strategy
+- Cross-region failover procedure not fully tested
+- Data consistency validation after recovery needs more robust approach
+- Knowledge gap: Regulatory requirements for financial data recovery capabilities
+
+### 2025-12-15 - Launch Readiness Concerns
+- Load testing results show potential bottlenecks at projected user volumes
+- Compliance verification checklist incomplete for financial data handling
+- Customer support team training materials missing troubleshooting guides
+- Question: Should we phase the rollout by user segment or launch to all simultaneously?
+
+## META-OBSERVATIONS & LESSONS
+
+### Key Themes & Patterns
+- Financial domain complexity consistently underestimated in early phases
+- Tension between consumer simplicity and business feature richness a recurring challenge
+- Data correctness and precision paramount in financial applications
+- Multi-tenant design decisions impact every aspect of the application
+
+### Process Improvement Ideas
+- Include financial domain experts earlier in requirement validation
+- Develop specialized testing strategies for financial calculation accuracy
+- Create better knowledge sharing between consumer and business feature teams
+- Implement stronger documentation requirements for financial logic
+
+### Technical Strategy Reflections
+- Microservice boundaries should align with financial domain concepts
+- Financial calculation logic should be centralized and well-tested
+- Data consistency and isolation need prioritization over performance in many cases
+- Consider specialized tools and patterns for financial application development 

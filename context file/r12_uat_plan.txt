@@ -1,0 +1,347 @@
+# FINZO USER ACCEPTANCE TESTING PLAN
+
+## 1. UAT INTRODUCTION & OBJECTIVES
+
+### 1.1 Purpose
+This User Acceptance Testing (UAT) plan outlines the approach, resources, and schedule needed to validate that the Finzo platform meets business requirements and is ready for production deployment. The UAT will focus on end-to-end business scenarios from the perspective of actual users.
+
+### 1.2 Objectives
+- Validate that the implemented features meet the business requirements specified in the PRD
+- Confirm the platform is usable and intuitive for the target user audience
+- Verify the accuracy of financial calculations and data processing
+- Ensure multi-tenant isolation and security controls are effective
+- Validate the end-to-end user journeys across all components
+
+### 1.3 Scope
+This UAT covers the Minimum Viable Product (MVP) implementation of the Finzo platform as outlined in the TDD plan (r09_TDD_v1.txt) and aligns with the requirements specified in the PRD (r04_prd_v2.txt). The testing will include:
+
+- User authentication and profile management
+- Transaction management with categorization
+- Expense sharing functionality
+- Document management with receipt processing
+- Basic tax calculations and reporting
+- Multi-tenant operations (for business users)
+- Core API functionality and integrations
+
+### 1.4 UAT Team Roles
+- **Business Sponsors**: Final approvers for UAT completion
+- **UAT Manager**: Coordinates the overall UAT process
+- **Business Analysts**: Map requirements to test scenarios
+- **End User Testers**: Perform actual testing activities
+  - Individual users (B2C testers)
+  - Business users (B2B testers)
+  - Financial specialists (tax & accounting experts)
+- **Development Support**: Provide technical assistance during testing
+- **UAT Environment Support**: Manage and support the UAT environment
+
+## 2. TEST APPROACH
+
+### 2.1 Testing Methodology
+The UAT will follow a structured approach with:
+
+1. **Preparation Phase**:
+   - User role assignments
+   - Test data preparation
+   - Environment setup and verification
+   - Training on test procedures
+
+2. **Execution Phase**:
+   - Guided test scenario execution
+   - Exploratory testing sessions
+   - Issue documentation and tracking
+   - Regular progress reviews
+
+3. **Evaluation Phase**:
+   - Results analysis
+   - Go/No-Go decision making
+   - Documentation of findings
+   - Sign-off process
+
+### 2.2 Test Environment
+- **Environment**: Dedicated UAT environment configured to match production specifications
+- **Data**: Sanitized production-like dataset with comprehensive test cases
+- **Access**: Separate UAT credentials for each tester based on assigned role
+- **Tools**:
+  - Test case management: TestRail
+  - Issue tracking: JIRA
+  - Screen recording: Loom (for issue reproduction)
+  - Test data management: Custom scripts
+
+### 2.3 Entry Criteria
+The following criteria must be met before UAT begins:
+
+- All development activities for MVP features are complete
+- Internal QA testing has been completed with no critical or high-severity bugs outstanding
+- Test environments are properly configured and stable
+- Test data has been created and validated
+- UAT test cases have been reviewed and approved
+- UAT team members have been trained on the application and testing procedures
+
+### 2.4 Exit Criteria
+UAT will be considered complete when:
+
+- All test scenarios have been executed
+- No critical or high-priority issues remain unresolved
+- 95% of medium-priority issues have been addressed
+- Business sponsors have formally signed off on the UAT results
+- Acceptance criteria for all key features have been met
+
+## 3. UAT SCENARIOS BY USER JOURNEY
+
+### 3.1 User Registration & Onboarding Journey
+
+#### 3.1.1 Individual User Registration (B2C)
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| REG-001 | New user registration | 1. Access registration page<br>2. Enter required personal details<br>3. Submit registration form<br>4. Verify email<br>5. Complete profile setup | User account is created and user is guided through onboarding process | Critical |
+| REG-002 | Profile completion | 1. Log in as new user<br>2. Navigate through profile setup<br>3. Add financial preferences<br>4. Set tax profile details<br>5. Save and continue | User profile is saved with all preferences and tax information | High |
+| REG-003 | Initial dashboard view | 1. Complete registration<br>2. Access dashboard<br>3. View guided tour<br>4. Interact with empty state prompts | Dashboard displays appropriate empty states with guidance for first actions | Medium |
+
+#### 3.1.2 Business Account Setup (B2B)
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| BIZ-001 | Business account creation | 1. Select business account option<br>2. Enter company details<br>3. Provide GST information<br>4. Submit registration<br>5. Verify email | Business account is created with proper business profile | Critical |
+| BIZ-002 | Team member invitation | 1. Log in as business admin<br>2. Navigate to team management<br>3. Invite team members<br>4. Assign appropriate roles<br>5. Verify invitations | Team members receive invitations with correct role assignments | High |
+| BIZ-003 | Business profile setup | 1. Access business settings<br>2. Configure expense policies<br>3. Set up approval workflows<br>4. Customize categories<br>5. Save settings | Business profile is configured with all settings properly applied | High |
+
+### 3.2 Transaction Management Journey
+
+#### 3.2.1 Transaction Recording & Categorization
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| TRX-001 | Manual transaction entry | 1. Navigate to transactions<br>2. Click "Add Transaction"<br>3. Enter transaction details<br>4. Select category<br>5. Save transaction | Transaction is saved with correct details and appears in transaction list | Critical |
+| TRX-002 | Automated categorization | 1. Add a new transaction<br>2. Leave category blank<br>3. Save transaction<br>4. Check assigned category | System suggests appropriate category based on transaction description | High |
+| TRX-003 | Transaction filtering & search | 1. Add multiple transactions<br>2. Use filters for date ranges<br>3. Filter by categories<br>4. Search by description<br>5. View results | Correct transactions are shown based on filters and search criteria | Medium |
+| TRX-004 | Transaction editing | 1. Select existing transaction<br>2. Modify details<br>3. Change category<br>4. Save changes<br>5. View updated transaction | Transaction is updated with all changes correctly applied | High |
+
+#### 3.2.2 Receipt Processing
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| REC-001 | Receipt upload & OCR | 1. Navigate to receipt upload<br>2. Upload receipt image<br>3. Wait for processing<br>4. Review extracted data<br>5. Confirm transaction | Receipt is processed, data correctly extracted, and transaction created | High |
+| REC-002 | Receipt data correction | 1. Upload receipt<br>2. Review extracted data<br>3. Correct inaccurate fields<br>4. Save transaction<br>5. View created transaction | User corrections are applied and final transaction is accurate | Medium |
+| REC-003 | Receipt attachment to existing transaction | 1. Select existing transaction<br>2. Choose "Attach Receipt"<br>3. Upload receipt image<br>4. Save changes<br>5. View transaction with receipt | Receipt is attached to the existing transaction and viewable | Medium |
+
+### 3.3 Expense Sharing Journey
+
+#### 3.3.1 Split Creation & Management
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| SPL-001 | Create new split expense | 1. Navigate to Splits<br>2. Create new split<br>3. Enter expense details<br>4. Add participants<br>5. Assign amounts<br>6. Save split | Split is created with correct participants and amounts | Critical |
+| SPL-002 | Equal split calculation | 1. Create new split<br>2. Add multiple participants<br>3. Select "Split Equally"<br>4. Confirm split<br>5. View resulting shares | Amount is divided equally among all participants | High |
+| SPL-003 | Custom split calculation | 1. Create new split<br>2. Add multiple participants<br>3. Assign custom percentages/amounts<br>4. Confirm split<br>5. Check individual shares | Custom amounts are correctly assigned to each participant | High |
+
+#### 3.3.2 Settlement Tracking
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| SET-001 | View outstanding balances | 1. Create multiple splits<br>2. Navigate to balances view<br>3. Check amounts owed<br>4. Filter by person<br>5. View settlement options | Correct balances are displayed for each person | High |
+| SET-002 | Record manual settlement | 1. View balances<br>2. Select "Record Settlement"<br>3. Enter settlement details<br>4. Confirm settlement<br>5. View updated balances | Settlement is recorded and balances are updated correctly | High |
+| SET-003 | Settlement reminder | 1. View unsettled splits<br>2. Select participant<br>3. Send reminder<br>4. Verify reminder is sent<br>5. Check reminder history | Reminder is sent to selected participant | Medium |
+
+### 3.4 Tax Management Journey
+
+#### 3.4.1 Tax Deduction Tracking
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| TAX-001 | Tag tax-deductible expenses | 1. Add new transaction<br>2. Mark as tax-deductible<br>3. Select deduction category<br>4. Save transaction<br>5. View in tax report | Transaction appears in tax deductions with correct category | High |
+| TAX-002 | Tax deduction summary | 1. Add multiple tax-deductible expenses<br>2. Navigate to tax summary<br>3. View deductions by category<br>4. Check total deduction amount<br>5. Export report | Tax summary shows accurate totals by category | High |
+| TAX-003 | Tax document attachment | 1. Select tax-related transaction<br>2. Attach supporting document<br>3. Add document description<br>4. Save changes<br>5. Verify document is attached | Document is attached to tax-related transaction and retrievable | Medium |
+
+#### 3.4.2 Tax Liability Calculation
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| LIA-001 | Income tax calculation (Old regime) | 1. Enter income details<br>2. Add tax-deductible expenses<br>3. Select old tax regime<br>4. Calculate tax liability<br>5. View detailed breakdown | Tax liability is calculated correctly with proper application of old regime rules | Critical |
+| LIA-002 | Income tax calculation (New regime) | 1. Enter income details<br>2. Select new tax regime<br>3. Calculate tax liability<br>4. View detailed breakdown<br>5. Compare with old regime | Tax liability is calculated correctly with proper application of new regime rules | Critical |
+| LIA-003 | Tax regime comparison | 1. Enter all income and deduction details<br>2. Navigate to regime comparison<br>3. View side-by-side comparison<br>4. Check savings amount<br>5. View recommendation | System correctly identifies optimal tax regime with accurate savings calculation | High |
+
+### 3.5 Document Management Journey
+
+#### 3.5.1 Document Upload & Organization
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| DOC-001 | Document upload | 1. Navigate to documents<br>2. Upload new document<br>3. Add metadata<br>4. Select category<br>5. Save document | Document is uploaded and stored with correct metadata | High |
+| DOC-002 | Document categorization | 1. Upload multiple documents<br>2. Let system categorize automatically<br>3. View suggested categories<br>4. Correct if needed<br>5. Confirm categorization | Documents are categorized correctly or with reasonable suggestions | Medium |
+| DOC-003 | Document search & retrieval | 1. Upload multiple documents<br>2. Navigate to document search<br>3. Search by various criteria<br>4. Filter results<br>5. View and download document | Correct documents are found based on search criteria | Medium |
+
+### 3.6 Banking Integration Journey
+
+#### 3.6.1 Bank Statement Import
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| BNK-001 | CSV bank statement import | 1. Navigate to import section<br>2. Upload bank statement CSV<br>3. Map columns<br>4. Confirm import<br>5. View imported transactions | Transactions are correctly imported with proper details | High |
+| BNK-002 | Duplicate detection | 1. Import bank statement<br>2. Import same statement again<br>3. View duplicate detection<br>4. Resolve duplicates<br>5. Check final transaction list | Duplicates are correctly identified and handled based on user decision | High |
+| BNK-003 | Transaction reconciliation | 1. Import bank statement<br>2. View unreconciled transactions<br>3. Match with existing transactions<br>4. Confirm matches<br>5. Check reconciliation status | Transactions are correctly reconciled with bank statement entries | Medium |
+
+### 3.7 Business Operations Journey (B2B)
+
+#### 3.7.1 Business Expense Management
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| BXP-001 | Expense submission | 1. Log in as team member<br>2. Create new expense<br>3. Add receipt and details<br>4. Submit for approval<br>5. Check submission status | Expense is submitted and routed to appropriate approver | High |
+| BXP-002 | Expense approval workflow | 1. Log in as approver<br>2. View pending approvals<br>3. Review expense details<br>4. Approve expense<br>5. Check approval history | Expense is correctly routed and approved with proper status updates | High |
+| BXP-003 | Expense policy enforcement | 1. Create expense exceeding policy limits<br>2. Submit for approval<br>3. View policy violation warnings<br>4. Proceed with submission<br>5. Check approval process | Policy violations are correctly identified and handled per configuration | Medium |
+
+#### 3.7.2 Basic Invoice Management
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| INV-001 | Invoice creation | 1. Navigate to invoices<br>2. Create new invoice<br>3. Add line items<br>4. Apply taxes<br>5. Save and review invoice | Invoice is created with correct calculations including taxes | High |
+| INV-002 | GST calculation | 1. Create invoice with multiple items<br>2. Apply different GST rates<br>3. View tax calculation<br>4. Modify quantities<br>5. Check updated calculations | GST is calculated correctly for each line item and totaled properly | Critical |
+| INV-003 | Invoice export | 1. Create and save invoice<br>2. Select export option<br>3. Choose format (PDF)<br>4. Generate export<br>5. View exported document | Invoice is exported in selected format with all details intact | Medium |
+
+### 3.8 Multi-tenant Operations (B2B)
+
+#### 3.8.1 Tenant Isolation & Access Control
+| ID | Scenario | Steps | Expected Results | Priority |
+|----|----------|-------|-----------------|----------|
+| TEN-001 | Multi-tenant data isolation | 1. Create data in tenant A<br>2. Log in to tenant B<br>3. Attempt to access tenant A data<br>4. Verify data isolation<br>5. Check audit logs | Data from tenant A is not visible in tenant B | Critical |
+| TEN-002 | Role-based access control | 1. Create users with different roles<br>2. Log in with each role<br>3. Attempt various actions<br>4. Verify permission enforcement<br>5. Check access logs | Permissions are correctly enforced based on user roles | Critical |
+| TEN-003 | Cross-tenant user management | 1. Create user with access to multiple tenants<br>2. Log in as that user<br>3. Switch between tenants<br>4. Perform actions in each tenant<br>5. Verify context separation | User can switch between tenants with proper context isolation | High |
+
+## 4. API TESTING SCENARIOS
+
+### 4.1 Authentication & Authorization
+| ID | Scenario | Expected Results | Priority |
+|----|----------|-----------------|----------|
+| API-001 | User authentication | Valid credentials return authentication token; invalid credentials return appropriate error | Critical |
+| API-002 | Token validation | Valid tokens grant access; expired or invalid tokens are rejected | Critical |
+| API-003 | Permission checking | API enforces permission checks based on user role | Critical |
+
+### 4.2 Core API Functionality
+| ID | Scenario | Expected Results | Priority |
+|----|----------|-----------------|----------|
+| API-004 | Transaction CRUD operations | Create, read, update, and delete operations function correctly for transactions | High |
+| API-005 | Split expense operations | API correctly handles split creation, participant management, and settlement | High |
+| API-006 | Document management | Upload, retrieval, and metadata operations work as expected | Medium |
+| API-007 | Tax calculation endpoints | Tax calculations return correct results for various scenarios | High |
+
+### 4.3 API Performance & Reliability
+| ID | Scenario | Expected Results | Priority |
+|----|----------|-----------------|----------|
+| API-008 | Response time under load | API response times remain under 500ms for standard operations with moderate load | High |
+| API-009 | Error handling | API returns appropriate error codes and messages for various error conditions | High |
+| API-010 | Pagination & large datasets | API correctly handles pagination for large result sets | Medium |
+
+## 5. NON-FUNCTIONAL TESTING
+
+### 5.1 Usability Testing
+| ID | Scenario | Expected Results | Priority |
+|----|----------|-----------------|----------|
+| USR-001 | Mobile responsiveness | UI adapts appropriately to different screen sizes | High |
+| USR-002 | Workflow efficiency | Key user journeys can be completed with minimal steps | High |
+| USR-003 | UI consistency | UI elements maintain consistent style and behavior throughout the application | Medium |
+| USR-004 | Error messages | Error messages are clear, helpful, and guide users toward resolution | Medium |
+
+### 5.2 Performance Testing
+| ID | Scenario | Expected Results | Priority |
+|----|----------|-----------------|----------|
+| PRF-001 | Page load times | Pages load within 2 seconds under normal conditions | High |
+| PRF-002 | Transaction processing speed | Transaction operations complete within 1 second | High |
+| PRF-003 | Document upload performance | Document uploads process at reasonable speed with progress indication | Medium |
+| PRF-004 | Report generation time | Reports generate within acceptable timeframes based on complexity | Medium |
+
+### 5.3 Security Testing
+| ID | Scenario | Expected Results | Priority |
+|----|----------|-----------------|----------|
+| SEC-001 | Data encryption | Sensitive data is properly encrypted in transit and at rest | Critical |
+| SEC-002 | Session management | Sessions are managed securely with appropriate timeouts | Critical |
+| SEC-003 | Input validation | Application properly validates and sanitizes all inputs | Critical |
+| SEC-004 | Tenant data isolation | Complete isolation between tenant data is maintained | Critical |
+
+## 6. UAT PROCESS & SCHEDULE
+
+### 6.1 UAT Process Flow
+1. **Preparation (1 week)**
+   - Test environment setup
+   - Test data preparation
+   - Tester training
+   - Test case review
+
+2. **Execution (2 weeks)**
+   - Week 1: Core functionality testing
+   - Week 2: Integration and end-to-end testing
+
+3. **Regression (3 days)**
+   - Verification of bug fixes
+   - Regression testing
+
+4. **Sign-off (2 days)**
+   - Results review
+   - Final acceptance decision
+
+### 6.2 Defect Management
+- **Severity Levels**:
+  - **Critical**: Prevents testing of core functionality, no workaround
+  - **High**: Major feature not working as specified, workaround possible
+  - **Medium**: Feature works but with limitations or minor issues
+  - **Low**: Cosmetic issues, minor inconsistencies
+
+- **Defect Lifecycle**:
+  1. Identify and document
+  2. Review and prioritize
+  3. Assign for resolution
+  4. Fix and verify
+  5. Close or reopen
+
+### 6.3 Reporting
+- Daily status reports during execution
+- Defect summary reports
+- Test completion reports
+- Final UAT report with recommendations
+
+## 7. ACCEPTANCE CRITERIA
+
+### 7.1 General Acceptance Criteria
+1. All critical and high-priority test scenarios pass
+2. No critical or high-severity defects remain unresolved
+3. System correctly processes financial calculations with 100% accuracy
+4. All documented user journeys can be completed successfully
+5. Multi-tenant isolation is fully effective
+6. Performance meets or exceeds defined thresholds
+
+### 7.2 Feature-Specific Acceptance Criteria
+
+#### 7.2.1 User Management & Authentication
+- User registration works for all user types
+- Authentication is secure and reliable
+- Role-based permissions function correctly
+- Profile management features work as specified
+
+#### 7.2.2 Transaction Management
+- Transactions can be created, viewed, edited, and deleted
+- Categorization works automatically and manually
+- Transaction search and filtering functions properly
+- Importing transactions works accurately
+
+#### 7.2.3 Expense Sharing
+- Split expenses can be created with multiple participants
+- Calculations for different split types are accurate
+- Settlement tracking functions correctly
+- Balance summaries are accurate
+
+#### 7.2.4 Tax Management
+- Tax deductions are correctly tracked and categorized
+- Tax liability calculations are accurate for both regimes
+- Tax reports are generated correctly
+- Documents can be attached to tax-related transactions
+
+#### 7.2.5 Document Management
+- Documents can be uploaded, categorized, and retrieved
+- OCR processing works for supported document types
+- Document search works effectively
+- Document access respects permissions
+
+#### 7.2.6 Business Operations (B2B)
+- Expense approval workflows function as configured
+- Invoice creation and GST calculations are accurate
+- Business-specific reports generate correctly
+- Multi-tenant operations maintain data isolation
+
+## 8. UAT SIGN-OFF
+
+Upon successful completion of UAT testing and meeting all acceptance criteria, formal sign-off will be obtained from:
+
+1. Business Sponsor
+2. Product Owner
+3. UAT Manager
+4. Representative End Users (B2C and B2B)
+
+Final sign-off indicates that the system is deemed fit for purpose and ready for production deployment. 
