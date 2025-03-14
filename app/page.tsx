@@ -245,6 +245,13 @@ const services = [
 
 const calculators = [
   {
+    id: 'investment',
+    name: 'Investment Calculator',
+    description: 'Plan your investments and see how they grow over time',
+    path: '/calculators/investment',
+    icon: '📈'
+  },
+  {
     id: 'income-tax',
     name: 'Income Tax Calculator',
     description: 'Calculate your tax liability for both new & old regime',
