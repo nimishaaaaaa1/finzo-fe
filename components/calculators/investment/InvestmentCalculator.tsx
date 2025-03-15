@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { debounce } from 'lodash';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import RealTimeFinancialData from './RealTimeFinancialData';
 import TimeHorizonProjections from './TimeHorizonProjections';
 import InvestmentEducation from './InvestmentEducation';
 import financialDataService from '@/services/api/financialDataService';
@@ -195,7 +194,6 @@ export default function InvestmentCalculator() {
         <Tabs defaultValue="calculator" className="w-full">
           <TabsList className="w-full mb-6">
             <TabsTrigger value="calculator" className="flex-1">Calculator</TabsTrigger>
-            <TabsTrigger value="market-data" className="flex-1">Market Data</TabsTrigger>
             <TabsTrigger value="projections" className="flex-1">Projections</TabsTrigger>
             <TabsTrigger value="education" className="flex-1">Education</TabsTrigger>
           </TabsList>
@@ -386,12 +384,12 @@ export default function InvestmentCalculator() {
                       </div>
                       
                       {/* Chart grid - more subtle and elegant */}
-                      <div className="absolute inset-0 border-b border-l border-gray-200">
+                      <div className="absolute inset-0 border-b border-l border-gray-200/50">
                         {/* Horizontal grid lines - more subtle */}
                         {[0.25, 0.5, 0.75].map((ratio) => (
                           <div 
                             key={ratio}
-                            className="absolute w-full border-t border-gray-100"
+                            className="absolute w-full border-t border-gray-100/50"
                             style={{ top: `${ratio * 100}%` }}
                           />
                         ))}
@@ -402,19 +400,19 @@ export default function InvestmentCalculator() {
                         {/* Enhanced gradients */}
                         <defs>
                           <linearGradient id="totalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#10B981" stopOpacity="0.4" />
+                            <stop offset="0%" stopColor="#10B981" stopOpacity="0.6" />
                             <stop offset="100%" stopColor="#10B981" stopOpacity="0.05" />
                           </linearGradient>
                           <linearGradient id="investedGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.2" />
+                            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
                             <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.02" />
                           </linearGradient>
                           {/* Add drop shadow for lines */}
                           <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
                             <feOffset dx="0" dy="1" result="offsetblur" />
                             <feComponentTransfer>
-                              <feFuncA type="linear" slope="0.1" />
+                              <feFuncA type="linear" slope="0.2" />
                             </feComponentTransfer>
                             <feMerge>
                               <feMergeNode />
@@ -440,7 +438,7 @@ export default function InvestmentCalculator() {
                           points={chartPaths.investedAmountLine}
                           fill="none"
                           stroke="#3B82F6"
-                          strokeWidth="2"
+                          strokeWidth="2.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           filter="url(#dropShadow)"
@@ -451,7 +449,7 @@ export default function InvestmentCalculator() {
                           points={chartPaths.totalValueLine}
                           fill="none"
                           stroke="#10B981"
-                          strokeWidth="2.5"
+                          strokeWidth="3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           filter="url(#dropShadow)"
@@ -463,23 +461,24 @@ export default function InvestmentCalculator() {
                             {/* Only render data points for start, end, and every 3rd point in between for better performance */}
                             {(i === 0 || i === chartData.length - 1 || i % 3 === 0) && (
                               <>
+                                {/* Total Value data point - minimal and subtle */}
                                 <circle
                                   cx={`${(i / (chartData.length - 1)) * 100}`}
                                   cy={`${100 - (d.totalValue / maxValue) * 100}`}
-                                  r="3"
+                                  r="2"
                                   fill="#10B981"
                                   stroke="#fff"
-                                  strokeWidth="1.5"
-                                  className="drop-shadow-sm"
+                                  strokeWidth="1"
                                 />
+                                
+                                {/* Invested Amount data point - minimal and subtle */}
                                 <circle
                                   cx={`${(i / (chartData.length - 1)) * 100}`}
                                   cy={`${100 - (d.investedAmount / maxValue) * 100}`}
-                                  r="3"
+                                  r="2"
                                   fill="#3B82F6"
                                   stroke="#fff"
-                                  strokeWidth="1.5"
-                                  className="drop-shadow-sm"
+                                  strokeWidth="1"
                                 />
                               </>
                             )}
@@ -498,7 +497,7 @@ export default function InvestmentCalculator() {
                                   '100%',
                             transform: i === 1 ? 'translateX(-50%)' : 'none'
                           }}
-                          className="bg-white/50 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                          className="bg-white/70 px-2 py-0.5 rounded-md backdrop-blur-sm shadow-sm">
                             Year {d.year}
                           </div>
                         ))}
@@ -508,12 +507,12 @@ export default function InvestmentCalculator() {
                   
                   {/* Legend - Elegant styling */}
                   <div className="flex justify-center mt-4 text-sm">
-                    <div className="flex items-center mr-8 bg-white/50 px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-sm">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2 shadow-sm"></div>
+                    <div className="flex items-center mr-8 bg-white/70 px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-sm">
+                      <div className="w-4 h-4 bg-green-500 rounded-full mr-2 shadow-sm"></div>
                       <span className="font-medium text-gray-700">Total Value</span>
                     </div>
-                    <div className="flex items-center bg-white/50 px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-sm">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full mr-2 shadow-sm"></div>
+                    <div className="flex items-center bg-white/70 px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-sm">
+                      <div className="w-4 h-4 bg-blue-500 rounded-full mr-2 shadow-sm"></div>
                       <span className="font-medium text-gray-700">Invested Amount</span>
                     </div>
                   </div>
@@ -567,10 +566,6 @@ export default function InvestmentCalculator() {
                 </div>
               </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="market-data">
-            <RealTimeFinancialData />
           </TabsContent>
           
           <TabsContent value="projections">
