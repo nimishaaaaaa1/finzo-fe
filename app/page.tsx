@@ -253,7 +253,7 @@ const calculators = [
   },
   {
     id: 'investment-analysis',
-    name: 'Investment Analysis',
+    name: 'Investment Stimulator',
     description: 'Make data-driven decisions using prediction market-based analysis',
     path: '/calculators/investment-analysis',
     icon: '📊'
