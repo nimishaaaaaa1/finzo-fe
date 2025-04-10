@@ -32,7 +32,7 @@ interface SimulationResult {
 export function InvestmentSimulator() {
   const [initialInvestment, setInitialInvestment] = useState<number>(100000);
   const [timeHorizon, setTimeHorizon] = useState<number>(5);
-  const [selectedAsset, setSelectedAsset] = useState<string>('equity');
+  const [selectedAsset, setSelectedAsset] = useState<string>('');
   const [predictionMarkets, setPredictionMarkets] = useState<PredictionMarketData[]>([]);
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -190,7 +190,7 @@ export function InvestmentSimulator() {
             </div>
             <div className="space-y-2">
               <Label>Asset Class</Label>
-              <Select value={selectedAsset} onValueChange={setSelectedAsset}>
+              <Select value={selectedAsset} onValueChange={(value: string) => setSelectedAsset(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select asset class" />
                 </SelectTrigger>
