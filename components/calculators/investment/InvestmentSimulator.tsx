@@ -46,7 +46,7 @@ const assetOptions: AssetOption[] = [
 export function InvestmentSimulator() {
   const [initialInvestment, setInitialInvestment] = useState<number>(100000);
   const [timeHorizon, setTimeHorizon] = useState<number>(5);
-  const [selectedAsset, setSelectedAsset] = useState<AssetOption | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<string>('');
   const [predictionMarkets, setPredictionMarkets] = useState<PredictionMarketData[]>([]);
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -206,7 +206,7 @@ export function InvestmentSimulator() {
               <Label>Asset Class</Label>
               <Select
                 value={selectedAsset}
-                onValueChange={(option: AssetOption | null) => setSelectedAsset(option)}
+                onValueChange={(value: string) => setSelectedAsset(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select asset class" />
