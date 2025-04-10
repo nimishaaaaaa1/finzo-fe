@@ -92,7 +92,7 @@ const INVESTMENT_OPTIONS = [
 ];
 
 export default function InvestmentAnalysis() {
-  const [selectedInvestments, setSelectedInvestments] = useState<string[]>(['stocks']);
+  const [selectedInvestments, setSelectedInvestments] = useState<(keyof typeof INVESTMENT_OPTIONS[number]['id'])[]>(['stocks']);
   const [investmentAmount, setInvestmentAmount] = useState<number>(100000);
   const [timeHorizon, setTimeHorizon] = useState<number>(5);
   const [simulationResults, setSimulationResults] = useState<any[]>([]);
@@ -129,7 +129,7 @@ export default function InvestmentAnalysis() {
       for (let year = 1; year <= timeHorizon; year++) {
         // Calculate weighted return based on selected investments
         let weightedReturn = 0;
-        selectedInvestments.forEach(investment => {
+        selectedInvestments.forEach((investment: keyof typeof selectedScenario.impact) => {
           weightedReturn += selectedScenario.impact[investment];
         });
         weightedReturn /= selectedInvestments.length;
