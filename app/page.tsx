@@ -252,11 +252,11 @@ const calculators = [
     icon: '📈'
   },
   {
-    id: 'investment-simulation',
-    name: 'Investment Simulator',
-    description: 'Simulate investment scenarios using prediction market data',
-    path: '/calculators/investment-simulation',
-    icon: '🎯'
+    id: 'investment-analysis',
+    name: 'Investment Analysis',
+    description: 'Make data-driven decisions using prediction market-based analysis',
+    path: '/calculators/investment-analysis',
+    icon: '📊'
   },
   {
     id: 'income-tax',
