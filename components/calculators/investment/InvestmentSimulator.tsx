@@ -190,7 +190,7 @@ export function InvestmentSimulator() {
             </div>
             <div className="space-y-2">
               <Label>Asset Class</Label>
-              <Select value={selectedAsset} onValueChange={(value: string) => setSelectedAsset(value)}>
+              <Select value={selectedAsset} onValueChange={(value) => setSelectedAsset(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select asset class" />
                 </SelectTrigger>
