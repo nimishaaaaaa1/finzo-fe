@@ -29,10 +29,24 @@ interface SimulationResult {
   };
 }
 
+// Define the option type
+interface AssetOption {
+  value: string;
+  label: string;
+}
+
+// Define the options
+const assetOptions: AssetOption[] = [
+  { value: 'equity', label: 'Equity' },
+  { value: 'fixed-income', label: 'Fixed Income' },
+  { value: 'real-estate', label: 'Real Estate' },
+  { value: 'crypto', label: 'Cryptocurrency' },
+];
+
 export function InvestmentSimulator() {
   const [initialInvestment, setInitialInvestment] = useState<number>(100000);
   const [timeHorizon, setTimeHorizon] = useState<number>(5);
-  const [selectedAsset, setSelectedAsset] = useState<string>('');
+  const [selectedAsset, setSelectedAsset] = useState<AssetOption | null>(null);
   const [predictionMarkets, setPredictionMarkets] = useState<PredictionMarketData[]>([]);
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -190,15 +204,19 @@ export function InvestmentSimulator() {
             </div>
             <div className="space-y-2">
               <Label>Asset Class</Label>
-              <Select value={selectedAsset} onValueChange={(value) => setSelectedAsset(value)}>
+              <Select
+                value={selectedAsset}
+                onValueChange={(option: AssetOption | null) => setSelectedAsset(option)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select asset class" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="equity">Equity</SelectItem>
-                  <SelectItem value="fixed-income">Fixed Income</SelectItem>
-                  <SelectItem value="real-estate">Real Estate</SelectItem>
-                  <SelectItem value="crypto">Cryptocurrency</SelectItem>
+                  {assetOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
