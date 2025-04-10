@@ -252,6 +252,13 @@ const calculators = [
     icon: '📈'
   },
   {
+    id: 'investment-simulation',
+    name: 'Investment Simulator',
+    description: 'Simulate investment scenarios using prediction market data',
+    path: '/calculators/investment-simulation',
+    icon: '🎯'
+  },
+  {
     id: 'income-tax',
     name: 'Income Tax Calculator',
     description: 'Calculate your tax liability for both new & old regime',
